@@ -1,4 +1,4 @@
-=== Visitor Check In ===
+=== Apply ACF Layout ===
 
 Contributors: tcmulder
 Tags: acf, layout, layouts, template, templates, duplicate
@@ -26,6 +26,10 @@ This plugin allows you to create layouts with various Advanced Custom Field (ACF
 2. Activate the plugin through the "Plugins" menu in WordPress.
 
 == Changelog ==
+
+= 0.2.1 =
+
+* Updated readme title.
 
 = 0.2.0 =
 
