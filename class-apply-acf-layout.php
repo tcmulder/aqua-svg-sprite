@@ -31,6 +31,8 @@ Class Apply_ACF_Layout {
 	 * Create field for choosing a layout to apply
 	 */
 	public static function create_layout_select() {
+
+		// make sure ACF is installed
 		if( function_exists( 'acf_add_local_field_group' ) ) {
 
 			// get plugin options
@@ -60,7 +62,7 @@ Class Apply_ACF_Layout {
 				}
 			}
 
-			// create the field for layout post type only
+			// create a special version of the field used only for the layout post type
 			acf_add_local_field_group(array (
 				'key' => 'group_apply_acf_layout_on_layout',
 				'title' => 'Apply Layout',
@@ -70,6 +72,7 @@ Class Apply_ACF_Layout {
 						'label' => __( 'Choose New Layout', 'apply-acf-layout' ),
 						'name' => 'apply_layout',
 						'type' => 'post_object',
+						// only for the layout post type identify the functionality as being meant for creating new layouts
 						'instructions' => __( '<p>Create a new layout from an existing post. <strong><em>warning:</em></strong> this will replace all content on this layout with the content from the page you choose.</p>', 'apply-acf-layout' ),
 						'required' => 0,
 						'conditional_logic' => 0,
@@ -78,6 +81,7 @@ Class Apply_ACF_Layout {
 							'class' => '',
 							'id' => '',
 						),
+						// only for the layout post type all other post types can serve as layouts
 						'post_type' => array (
 						),
 						'taxonomy' => array (
@@ -88,6 +92,7 @@ Class Apply_ACF_Layout {
 						'ui' => 1,
 					),
 				),
+				// show only for the layout post type
 				'location' => array (
 					array (
 						array (
@@ -97,8 +102,7 @@ Class Apply_ACF_Layout {
 						),
 					),
 				),
-				// must be way down so hide_on_screen applies for other fields
-				'menu_order' => 99,
+				'menu_order' => 999, // must be way down so hide_on_screen applies for other fields
 				'position' => 'side',
 				'style' => 'default',
 				'label_placement' => 'top',
@@ -125,7 +129,6 @@ Class Apply_ACF_Layout {
 							'class' => '',
 							'id' => '',
 						),
-						// add additional post types if you would like more than just the built-in layouts
 						'post_type' => $layout_types,
 						'taxonomy' => array (
 						),
@@ -136,8 +139,7 @@ Class Apply_ACF_Layout {
 					),
 				),
 				'location' => $post_types,
-				// must be way down so hide_on_screen applies for other fields
-				'menu_order' => 99,
+				'menu_order' => 999, // must be way down so hide_on_screen applies for other fields
 				'position' => 'side',
 				'style' => 'default',
 				'label_placement' => 'top',
@@ -150,7 +152,6 @@ Class Apply_ACF_Layout {
 
 	/**
 	 * Create custom post type for layouts
-	 * (adapted from https://support.advancedcustomfields.com/forums/topic/copy-flexible-content-layout-from-one-post-to-another/)
 	 */
 
 	// custom post type
@@ -161,17 +162,17 @@ Class Apply_ACF_Layout {
 	                'name'                       => _x( 'Layouts', 'Taxonomy General Name', 'apply-acf-layout' ),
 	                'singular_name'              => _x( 'Layout', 'Taxonomy Singular Name', 'apply-acf-layout' ),
 	                'menu_name'                  => __( 'Layouts', 'apply-acf-layout' ),
-	                'all_items'                  => __( 'All Items', 'apply-acf-layout' ),
-	                'parent_item'                => __( 'Parent Item', 'apply-acf-layout' ),
-	                'parent_item_colon'          => __( 'Parent Item:', 'apply-acf-layout' ),
-	                'new_item_name'              => __( 'New Item Name', 'apply-acf-layout' ),
-	                'add_new_item'               => __( 'Add New Item', 'apply-acf-layout' ),
-	                'edit_item'                  => __( 'Edit Item', 'apply-acf-layout' ),
-	                'update_item'                => __( 'Update Item', 'apply-acf-layout' ),
-	                'separate_items_with_commas' => __( 'Separate items with commas', 'apply-acf-layout' ),
-	                'search_items'               => __( 'Search Items', 'apply-acf-layout' ),
-	                'add_or_remove_items'        => __( 'Add or remove items', 'apply-acf-layout' ),
-	                'choose_from_most_used'      => __( 'Choose from the most used items', 'apply-acf-layout' ),
+	                'all_items'                  => __( 'All Layouts', 'apply-acf-layout' ),
+	                'parent_item'                => __( 'Parent Layout', 'apply-acf-layout' ),
+	                'parent_item_colon'          => __( 'Parent Layout:', 'apply-acf-layout' ),
+	                'new_item_name'              => __( 'New Layout Name', 'apply-acf-layout' ),
+	                'add_new_item'               => __( 'Add New Layout', 'apply-acf-layout' ),
+	                'edit_item'                  => __( 'Edit Layout', 'apply-acf-layout' ),
+	                'update_item'                => __( 'Update Layout', 'apply-acf-layout' ),
+	                'separate_items_with_commas' => __( 'Separate layouts with commas', 'apply-acf-layout' ),
+	                'search_items'               => __( 'Search Layouts', 'apply-acf-layout' ),
+	                'add_or_remove_items'        => __( 'Add or remove layouts', 'apply-acf-layout' ),
+	                'choose_from_most_used'      => __( 'Choose from the most used layouts', 'apply-acf-layout' ),
 	                'not_found'                  => __( 'Not Found', 'apply-acf-layout' ),
 	            ),
 	            'menu_icon' => 'dashicons-layout',
@@ -189,7 +190,7 @@ Class Apply_ACF_Layout {
 	    );
 	}
 
-	// set public posts to private
+	// set public posts to private when published so layouts don't appear for anyone but logged-in users
 	public static function set_layout_status($new_status, $old_status, $post) {
 	    if ('apply-acf-layouts' == $post->post_type && 'publish' == $new_status && $old_status != $new_status && !post_password_required($post)) {
 	        $post->post_status = 'private';
@@ -197,7 +198,7 @@ Class Apply_ACF_Layout {
 	    }
 	}
 
-	// redirect non-logged-in users to login page
+	// redirect non-logged-in users to the login page
 	public static function redirect_non_layout_users() {
 	    if(is_post_type_archive('apply-acf-layouts') && !is_user_logged_in()) {
 	        auth_redirect();
@@ -261,12 +262,10 @@ Class Apply_ACF_Layout {
 
 	// render the form fields
 	public static function apply_acf_layout_post_types_render(  ) {
+		// grab the plugin options
 		$options = get_option( 'apply_acf_layout_settings' );
 		// get all post types that are publicly available
-		$args = array(
-		   'public'   => true,
-		);
-		$post_types = get_post_types( $args );
+		$post_types = get_post_types( array( 'public'   => true ) );
 		// create checkboxs listing the post types for which layouts should appear
 		$html = '<fieldset>';
 		foreach ( $post_types as $key => $name ) {
@@ -293,10 +292,7 @@ Class Apply_ACF_Layout {
 	public static function apply_acf_layout_layout_types_render(  ) {
 		$options = get_option( 'apply_acf_layout_settings' );
 		// get all post types that are publicly available
-		$args = array(
-		   'public'   => true,
-		);
-		$post_types = get_post_types( $args );
+		$post_types = get_post_types( array( 'public'   => true ) );
 		// create checkboxs listing the post types for which layouts should appear
 		$html = '<fieldset>';
 		foreach ( $post_types as $key => $name ) {
@@ -343,7 +339,7 @@ Class Apply_ACF_Layout {
 	}
 
 	/**
-	* Apply a layout from one page's flexible layout to another.
+	* Apply a layout from one page's ACF fields layout to another
 	*/
 	public static function import_layouts_from_a_different_page( $post_id ) {
 
@@ -375,7 +371,7 @@ Class Apply_ACF_Layout {
 		// add the new acf field values to be saved with this post
 		$_POST['acf'] = $layout_fields;
 
-		// clear out the pages to import setting
+		// clear out the layout to apply setting
 		$_POST['acf']['field_apply_acf_layout_field'] = array();
 
 	}
