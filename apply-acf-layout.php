@@ -2,7 +2,7 @@
 /*
 Plugin Name: Apply ACF Layout
 Description: Apply a flexible layout from one post to another.
-Version:     0.1.0
+Version:     0.2.0
 Author:      Tomas Mulder
 Author URI:  http://www.tcmulder.com
 License:     GPL2

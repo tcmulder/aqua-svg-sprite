@@ -4,7 +4,7 @@ Contributors: tcmulder
 Tags: acf, layout, layouts, template, templates, duplicate
 Requires at least: 4.7.3
 Tested up to: 4.7.3
-Stable tag: 0.1.0
+Stable tag: 0.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,6 +28,10 @@ Allows you to apply Advanced Custom Field flexible content layouts to pages. You
 2. Activate the plugin through the "Plugins" menu in WordPress.
 
 == Changelog ==
+
+= 0.2.0 =
+
+* Allowed for more ACF fields to be copied.
 
 = 0.1.0 =
 

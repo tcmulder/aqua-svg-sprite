@@ -40,10 +40,10 @@ Class Apply_ACF_Layout {
 				'fields' => array (
 					array (
 						'key' => 'field_apply_acf_layout_field',
-						'label' => 'Layout to Apply',
+						'label' => 'Choose New Layout',
 						'name' => 'apply_layout',
 						'type' => 'post_object',
-						'instructions' => ( $activated ? '' : '<span class="acf-required">*</span> <strong>This won\'t work yet:</strong> you must choose a flexible content type in <a href="' . get_admin_url( null, '/edit.php?post_type=apply-acf-layouts&page=apply_acf_layout/' ) . '">Layouts > Options</a> first' ),
+						'instructions' => '<p>Apply a new layout to this page. <strong>warning:</strong> this will replace all content on this page with placeholder content from the new layout.</p>',
 						'required' => 0,
 						'conditional_logic' => 0,
 						'wrapper' => array (
@@ -58,33 +58,9 @@ Class Apply_ACF_Layout {
 						'taxonomy' => array (
 						),
 						'allow_null' => 0,
-						'multiple' => 1,
+						'multiple' => 0,
 						'return_format' => 'id',
 						'ui' => 1,
-					),
-					array (
-						'key' => 'field_apply_acf_layout_existing_content_field',
-						'label' => 'Existing Content',
-						'name' => 'existing_content',
-						'type' => 'radio',
-						'instructions' => '',
-						'required' => 0,
-						'conditional_logic' => 0,
-						'wrapper' => array (
-							'width' => '',
-							'class' => '',
-							'id' => '',
-						),
-						'choices' => array (
-							'append' => 'Append',
-							'replace' => 'Replace <em>(<strong>warning:</strong> existing content on this page will be replaced)</em>',
-						),
-						'allow_null' => 0,
-						'other_choice' => 0,
-						'save_other_choice' => 0,
-						'default_value' => 'append',
-						'layout' => 'vertical',
-						'return_format' => 'value',
 					),
 				),
 				// shows up anywhere: you can customize this to include just specific post types if you want
@@ -250,61 +226,35 @@ Class Apply_ACF_Layout {
 		<?php
 	}
 
-	 /**
-	 * Apply a layout from one page's flexible layout to another.
-	 * (adapted from https://support.advancedcustomfields.com/forums/topic/copy-flexible-content-layout-from-one-post-to-another/)
-	 */
+	/**
+	* Apply a layout from one page's flexible layout to another.
+	*/
 	public static function import_layouts_from_a_different_page( $post_id ) {
 
-		// bail early if no ACF data
-		if ( empty( $_POST['acf'] ) ) {
+		// see if there's an id for a layout to apply to this post
+		$import_layout_id = $_POST['acf']['field_apply_acf_layout_field'];
+
+		// bail early if no layout replacement was requested
+		if ( empty( $import_layout_id ) ) {
 			return;
 		}
 
-		// identify the flexible content field to replace
-		$replace_option = get_option( 'apply_acf_layout_settings' );
-		$replace_key = $replace_option['apply_acf_layout_flexible_field'];
+		// store all fields from this post
+		$post_fields = get_field_objects( $post_id );
 
-		// bail if the content to replace isn't defined
-		if ( ! $replace_key ) {
-			return;
+		// prep to store all fields from the layout
+		$layout_fields = array();
+
+		// get all top-level fields from the layout
+		$fields_from_layout = get_field_objects( $import_layout_id );
+
+		// apply each layout field to this post
+		foreach ( $fields_from_layout as $field) {
+			$layout_fields[$field['key']] = $field['value'];
 		}
 
-		// determine if this should append or replace existing content
-		$apply_type = $_POST['acf']['field_apply_acf_layout_existing_content_field'];
-
-		// store current layouts (empty by default so layouts will be replaced instead of appended)
-		$current_page_flex_layouts = array();
-
-		// get flex layouts from this page
-		if ( 'replace' !== $apply_type ) {
-			if ( is_array( $_POST['acf'][$replace_key] ) && ! empty( $_POST['acf'][$replace_key] ) ) {
-				$current_page_flex_layouts = $_POST['acf'][$replace_key];
-			}
-		}
-
-		// determine if there are any pages to import (field_apply_acf_layout_field is a Select field named "Apply Layout")
-		$pages_to_import = $_POST['acf']['field_apply_acf_layout_field'];
-
-		// if there aren't any layouts to import, skip the rest
-		if ( empty( $pages_to_import ) ) {
-			return;
-		}
-
-		// loop through the (possibly) multiple pages that we'll import
-		foreach ( $pages_to_import as $page_id ) {
-
-			// get the layouts value from the selected page
-			$layouts_from_page = get_field_object( 'modules', $page_id, false, true );
-
-			// add the value to this page
-			if ( ! empty( $layouts_from_page['value'] ) ) {
-				$current_page_flex_layouts = array_merge( $current_page_flex_layouts, $layouts_from_page['value'] );
-			}
-		}
-
-		// re-set the Layout field value with any imported pages, then continue saving
-		$_POST['acf'][$replace_key] = $current_page_flex_layouts;
+		// add the new acf field values to be saved with this post
+		$_POST['acf'] = $layout_fields;
 
 		// clear out the pages to import setting
 		$_POST['acf']['field_apply_acf_layout_field'] = array();
