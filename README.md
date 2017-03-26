@@ -27,6 +27,10 @@ This plugin allows you to create layouts with various Advanced Custom Field (ACF
 
 == Changelog ==
 
+= 0.2.1 =
+
+* Updated readme title.
+
 = 0.2.0 =
 
 * Made it so any matching top-level ACF field from the layout chosen will be applied to the post chosen (instead of limiting this to just one flexible content field as in version 0.1.0).
