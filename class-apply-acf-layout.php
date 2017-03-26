@@ -43,7 +43,7 @@ Class Apply_ACF_Layout {
 						'label' => 'Choose New Layout',
 						'name' => 'apply_layout',
 						'type' => 'post_object',
-						'instructions' => '<p>Apply a new layout to this page. <strong>warning:</strong> this will replace all content on this page with placeholder content from the new layout.</p>',
+						'instructions' => '<p>Apply a new layout to this page. <strong><em>warning:</em></strong> this will replace all content on this page with placeholder content from the new layout.</p>',
 						'required' => 0,
 						'conditional_logic' => 0,
 						'wrapper' => array (
@@ -162,54 +162,37 @@ Class Apply_ACF_Layout {
 		register_setting( 'pluginPage', 'apply_acf_layout_settings' );
 		add_settings_section(
 			'apply_acf_layout_pluginPage_section',
-			__( 'Flexible Content Field Choice', 'apply-acf-layout' ),
+			__( 'Where To Show', 'apply-acf-layout' ),
 			array( 'Apply_ACF_Layout', 'apply_acf_layout_settings_section_callback' ),
 			'pluginPage'
 		);
 		add_settings_field(
 			'apply_acf_layout_flexible_field',
-			__( 'Use this field:', 'apply-acf-layout' ),
-			array( 'Apply_ACF_Layout', 'apply_acf_layout_flexible_field_render' ),
+			__( 'Post types:', 'apply-acf-layout' ),
+			array( 'Apply_ACF_Layout', 'apply_acf_layout_post_types_render' ),
 			'pluginPage',
 			'apply_acf_layout_pluginPage_section'
 		);
 	}
 
-	// render the select box
-	public static function apply_acf_layout_flexible_field_render(  ) {
+	// define section description
+	public static function apply_acf_layout_settings_section_callback(  ) {
+		echo __( 'Select which post types should show the Apply ACF Layout options.', 'apply-acf-layout' );
+	}
+
+	// render the check boxes
+	public static function apply_acf_layout_post_types_render(  ) {
 		$options = get_option( 'apply_acf_layout_settings' );
 		// get all the flexible content options
-		$flexible_fields = array();
-		$args = array(
-			'post_type' => 'acf-field-group',
-			'posts_per_page' => -1,
-		);
-		$the_query = new WP_Query( $args );
-		if ( $the_query->have_posts() ) {
-			while ( $the_query->have_posts() ) { $the_query->the_post();
-				$group_id = get_the_id();
-				$group_title = get_the_title();
-				$fields = acf_get_fields_by_id( $group_id );
-				foreach ( $fields as $field ) {
-					if ( 'flexible_content' == $field['type'] ) {
-						$flexible_fields[$field['key']] = $field['label'] . ' (in ' . $group_title . ' group)';
-					}
-				}
-			}
-			wp_reset_postdata();
-		}
+		$post_types = get_post_types();
 		$html = '<select name="apply_acf_layout_settings[apply_acf_layout_flexible_field]">';
-		$i = 0;
-		foreach ( $flexible_fields as $key => $name ) {
-			$html .= '<option value="' . $key . '" ' . selected( $options['apply_acf_layout_flexible_field'], $key, false ) . '>' . $name . '</option>"';
+
+		foreach ( $post_types as $key => $name ) {
+			$type_obj = get_post_type_object( $name );
+			$html .= '<option value="' . $key . '" ' . selected( $options['apply_acf_layout_flexible_field'], $key, false ) . '>' . $type_obj->labels->name . '</option>"';
 		}
 		$html .= '</select>';
 		echo $html;
-	}
-
-	// define section description
-	public static function apply_acf_layout_settings_section_callback(  ) {
-		echo __( 'Select the flexible content field you are using to define layouts. You can only select one, and it must be at the top level of the field group.', 'apply-acf-layout' );
 	}
 
 	// define options page html
