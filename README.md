@@ -12,15 +12,13 @@ Allows you to apply Advanced Custom Field flexible content layouts to pages.
 
 == Description ==
 
-Allows you to apply Advanced Custom Field flexible content layouts to pages. You can build these layouts as a Layouts custom post type and then apply them to as many posts as you'd like. For instance, if you have a common layout that you'd like to use for a Team custom post type that includes a headshot module, a bio module, and a contact details module, you can create that as a layout in this plugin's Layouts custom post type and name it Team Member Layout; then, when you're creating your individual Team posts, you can apply that Team Member Layout and the three modules will be populated on the page, ready for content.
+This plugin allows you to create layouts with various Advanced Custom Field (ACF) configurations and then apply those to the pages of your site. For instance, if you have a common layout that you'd like to use for a Team custom post type that includes a headshot module, a bio module, and a contact details module, you can create that as a layout in this plugin's Layouts area and name it Team Member Layout; then, when you're creating your individual Team posts, you can apply that Team Member Layout and the three modules will be populated on the page, ready for new content.
 
-* Creates a Layouts custom post type where you can build modular pages based on your own flexible content type.
-
-* Allows you to apply those layouts to the posts on your site.
-
-* You can either replace all content with the new layout, or append the layout under existing content in the post.
-
-* Allows you to pick which flexible content field can be used for the layouts.
+* This plugin creates a Layouts custom post type where you can create various ACF layouts you'd like to reuse.
+* You can then apply those layouts to the pages of your site.
+* You can choose which post types have the Apply ACF Layout functionality available to them.
+* You can choose which which post types you can apply as layouts if you'd like to use post types other than the built in Layouts.
+* You can create a new Layout from any existing page of any post type on your site. So if you've built a page already and later decide you'd like to use that layout for other pages, you can use generate a Layout from it for this purpose.
 
 == Installation ==
 
@@ -31,7 +29,7 @@ Allows you to apply Advanced Custom Field flexible content layouts to pages. You
 
 = 0.2.0 =
 
-* Allowed for more ACF fields to be copied.
+* Made it so any matching top-level ACF field from the layout chosen will be applied to the post chosen (instead of limiting this to just one flexible content field as in version 0.1.0).
 
 = 0.1.0 =
 
