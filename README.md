@@ -1,4 +1,4 @@
-=== Visitor Check In ===
+=== Apply ACF Layout ===
 
 Contributors: tcmulder
 Tags: acf, layout, layouts, template, templates, duplicate
