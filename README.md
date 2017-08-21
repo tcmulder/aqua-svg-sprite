@@ -21,6 +21,10 @@ This plugin allows you to create an SVG sprite by uploading individual files to 
 
 == Changelog ==
 
-= 0.1.0 =
+= 0.0.2 =
+
+* Fix issue where featured image script executed on save of non-SVG posts.
+
+= 0.0.1 =
 
 * Initial release.
