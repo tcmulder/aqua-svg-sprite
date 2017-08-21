@@ -166,7 +166,7 @@ Class Aqua_SVG_Sprite {
 
 	public static function fix_svg() {
 	  echo '<style type="text/css">
-			.attachment-266x266, .thumbnail img {
+			#postimagediv .inside img, .thumbnail img {
 				 width: 100% !important;
 				 height: auto !important;
 			}
@@ -178,63 +178,67 @@ Class Aqua_SVG_Sprite {
 	*/
 	public static function create_svg_sprite( $post_id ) {
 
-		// get the directory where the svg sprite goes (within uploads)
-		$wp_upload_dir = wp_upload_dir();
-		$aqua_svg_sprite_dir = $wp_upload_dir['basedir'] . '/aqua-svg-sprite';
-		// create the directory if it doesn't already exist
-		if ( ! file_exists( $aqua_svg_sprite_dir ) ) {
-			mkdir( $aqua_svg_sprite_dir, 0777, true );
-		}
-		// start the svg sprite wrapper
-		$svg_sprite = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">';
-		// loop through all svgs
-		$args = array(
-			'post_type'         => 'aqua-svg-sprite',
-			'posts_per_page'    => -1,
-		);
-		$query = new WP_Query( $args );
-		if($query->have_posts()){
-			while($query->have_posts()){ $query->the_post();
-				// allow just svg-related info (used for wp_kses)
-				$allowed = array(
-					'svg' => array(
-						'width' => array(),
-						'height' => array(),
-						'viewbox' => array(),
-						'version' => array(),
-						'xmlns' => array(),
-						'xmlns:xlink' => array(),
-					),
-					'g' => array(
-						'stroke' => array(),
-						'stroke-width' => array(),
-						'fill' => array(),
-						'fill-rule' => array(),
-					),
-					'path' => array(
-						'd' => array(),
-						'id' => array(),
-					),
-				);
-				// get the id via acf or through the post data if is current post
-				$svg_id = (get_the_id() !== $post_id ? get_field('svg') : $_POST['acf']['field_58d70aee44096']);
-				// establish the slug (used as id for sprite)
-				$slug = strtolower(trim(preg_replace('/[\s-]+/', '-', preg_replace('/[^A-Za-z0-9-]+/', '-', preg_replace('/[&]/', 'and', preg_replace('/[\']/', '', iconv('UTF-8', 'ASCII//TRANSLIT', get_the_title()))))), '-'));
-				// create svg code and strip out unneeded elements
-				$svg = file_get_contents(get_attached_file(wp_kses($svg_id, $allowed)));
-				$svg = preg_replace('#\s(id|class)="[^"]+"#', '', $svg);
-				$svg = preg_replace('/<svg/i', '<symbol id="'.$slug.'"', $svg);
-				$svg = preg_replace('/<\/svg>/i', '</symbol>', $svg);
-				// add this svg to the sprite
-				$svg_sprite .= $svg;
+		if ( 'aqua-svg-sprite' === get_post_type( $post_id ) ) {
+			// get the directory where the svg sprite goes (within uploads)
+			$wp_upload_dir = wp_upload_dir();
+			$aqua_svg_sprite_dir = $wp_upload_dir['basedir'] . '/aqua-svg-sprite';
+			// create the directory if it doesn't already exist
+			if ( ! file_exists( $aqua_svg_sprite_dir ) ) {
+				mkdir( $aqua_svg_sprite_dir, 0777, true );
 			}
+			// start the svg sprite wrapper
+			$svg_sprite = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">';
+			// loop through all svgs
+			$args = array(
+				'post_type'         => 'aqua-svg-sprite',
+				'posts_per_page'    => -1,
+			);
+			$query = new WP_Query( $args );
+			if($query->have_posts()){
+				while($query->have_posts()){ $query->the_post();
+					// allow just svg-related info (used for wp_kses)
+					$allowed = array(
+						'svg' => array(
+							'width' => array(),
+							'height' => array(),
+							'viewbox' => array(),
+							'version' => array(),
+							'xmlns' => array(),
+							'xmlns:xlink' => array(),
+						),
+						'g' => array(
+							'stroke' => array(),
+							'stroke-width' => array(),
+							'fill' => array(),
+							'fill-rule' => array(),
+						),
+						'path' => array(
+							'd' => array(),
+							'id' => array(),
+						),
+					);
+					// get the id via acf or through the post data if is current post
+					$svg_id = (get_the_id() !== $post_id ? get_field('svg') : $_POST['acf']['field_58d70aee44096']);
+					// establish the slug (used as id for sprite)
+					$slug = strtolower(trim(preg_replace('/[\s-]+/', '-', preg_replace('/[^A-Za-z0-9-]+/', '-', preg_replace('/[&]/', 'and', preg_replace('/[\']/', '', iconv('UTF-8', 'ASCII//TRANSLIT', get_the_title()))))), '-'));
+					// create svg code and strip out unneeded elements
+					$svg = file_get_contents(get_attached_file(wp_kses($svg_id, $allowed)));
+					$svg = preg_replace('#\s(id|class)="[^"]+"#', '', $svg);
+					$svg = preg_replace('/<svg/i', '<symbol id="'.$slug.'"', $svg);
+					$svg = preg_replace('/<\/svg>/i', '</symbol>', $svg);
+					// add this svg to the sprite
+					$svg_sprite .= $svg;
+				}
+			}
+			// close the sprite wrapper
+			$svg_sprite .= '</svg>';
+			// create the svg file (rebuilds each time)
+			file_put_contents( $aqua_svg_sprite_dir . '/aqua-svg-sprite.svg', $svg_sprite );
+			// update the featured image to the uploaded image (allows acf relationship fields to show previews)
+			update_post_meta($post_id, '_thumbnail_id', $_POST['acf']['field_58d70aee44096']);
 		}
-		// close the sprite wrapper
-		$svg_sprite .= '</svg>';
-		// create the svg file (rebuilds each time)
-		file_put_contents( $aqua_svg_sprite_dir . '/aqua-svg-sprite.svg', $svg_sprite );
-		// update the featured image to the uploaded image (allows acf relationship fields to show previews)
-		update_post_meta($post_id, '_thumbnail_id', $_POST['acf']['field_58d70aee44096']);
+
 	}
+
 
 }
