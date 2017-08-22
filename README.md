@@ -1,7 +1,7 @@
-=== Apply ACF Layout ===
+=== Aqua SVG Sprite ===
 
 Contributors: tcmulder
-Tags: acf, layout, layouts, template, templates, duplicate
+Tags: svg sprite, svg, sprite, acf
 Requires at least: 4.7.1
 Tested up to: 4.8.1
 Stable tag: 0.0.3
