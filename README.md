@@ -29,6 +29,11 @@ Currently the API is pretty limited. A call to `aqua_svg('slug')` will output  s
 
 == Changelog ==
 
+= 0.0.4 =
+
+* Strip more code from <svg> files for better <symbol> support.
+* Add better comments and on-post documentation for usage.
+
 = 0.0.3 =
 
 * Add more details to readme.

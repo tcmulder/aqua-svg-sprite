@@ -2,9 +2,11 @@
 /**
  * Image Sizes
  * usage:
- * aqua_svg('slug');
- * or a more complex example (slug, viewbox, other attribures, echo boolean)
- * echo aqua_svg('slug', '0 0 1000 1000', 'width="100" height="100"', false);
+ *   aqua_svg( string $slug, string $viewbox = '', string $attr = '', boolean $echo = true )
+ * example:
+ *   aqua_svg( 'slug' );
+ * or a more complex example:
+ *   echo aqua_svg( 'slug', '0 0 1000 1000', 'width="100" height="100"', false );
  */
 function aqua_svg ( $slug,  $viewbox = '', $attr = '', $echo = true ) {
 	// if viewbox was set then create html
