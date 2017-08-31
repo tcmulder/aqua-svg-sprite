@@ -18,7 +18,7 @@ Class Aqua_SVG_Sprite {
 	 */
 	public static function init_hooks() {
 		self::$initiated = true;
-		add_action( 'init', array( 'Aqua_SVG_Sprite', 'create_acf_feields' ) );
+		add_action( 'acf/init', array( 'Aqua_SVG_Sprite', 'create_acf_feields' ) );
 		add_action( 'init', array( 'Aqua_SVG_Sprite', 'create_svg_post_type' ) );
 		add_filter( 'wp_check_filetype_and_ext', array( 'Aqua_SVG_Sprite', 'add_svg_mime_type' ), 10, 4 );
 		add_filter( 'upload_mimes', array( 'Aqua_SVG_Sprite', 'cc_mime_types' ) );
@@ -32,7 +32,6 @@ Class Aqua_SVG_Sprite {
 	public static function create_acf_feields() {
 
 		if( function_exists('acf_add_local_field_group') ):
-
 		acf_add_local_field_group(array (
 			'key' => 'group_58d70ae925cf4',
 			'title' => 'SVG Sprite',
@@ -42,9 +41,7 @@ Class Aqua_SVG_Sprite {
 					'label' => 'SVG File',
 					'name' => 'svg',
 					'type' => 'image',
-					'instructions' => 'You\'re highly encouraged to run the file through an SVG compressor like <a href="https://jakearchibald.github.io/svgomg/" target="_blank">SVG OMG</a> before uploading it here. This will make the images load faster, but more importantly it will strip extra code added by image editors that could prevent your website from loading SVG images correctly.
-
-		Images must be 1000x1000px in size, with the fill removed from the code.',
+					'instructions' => self::field_message(),
 					'required' => 1,
 					'conditional_logic' => 0,
 					'wrapper' => array (
@@ -100,6 +97,39 @@ Class Aqua_SVG_Sprite {
 		));
 
 		endif;
+
+	}
+
+	/**
+	 * Create message to users for the field
+	 */
+	public static function field_message() {
+		// describe requirements
+		$message = '
+			<p>
+				You\'re highly encouraged to run the file through an SVG compressor like
+				<a href="https://jakearchibald.github.io/svgomg/" target="_blank">SVG OMG</a>
+				before uploading it here. This will make the images load faster,
+				but more importantly it will strip extra code added by image editors that could
+				prevent your website from loading SVG images correctly. In most cases,
+				images should be 1000x1000px in size, with the fill removed from the code.
+			</p>
+		';
+		// provide API helpers
+		$message .='
+		<p>
+			Output this sprite item with default settings as follows:
+			<br>
+			<code>aqua_svg( \'' . get_post_field( 'post_name', $_GET['post'] ) . '\' );</code>
+		</p>
+		<p>
+			Full options are as follows:
+			<br>
+			<code>aqua_svg( string $slug, string $viewbox = \'\', string $attr = \'\', boolean $echo = true );</code>
+		</p>
+
+		';
+		return $message;
 
 	}
 
@@ -186,16 +216,16 @@ Class Aqua_SVG_Sprite {
 			if ( ! file_exists( $aqua_svg_sprite_dir ) ) {
 				mkdir( $aqua_svg_sprite_dir, 0777, true );
 			}
-			// start the svg sprite wrapper
-			$svg_sprite = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">';
+			// start the svg internals (symbols)
+			$svg_symbols = '';
 			// loop through all svgs
 			$args = array(
 				'post_type'         => 'aqua-svg-sprite',
 				'posts_per_page'    => -1,
 			);
 			$query = new WP_Query( $args );
-			if($query->have_posts()){
-				while($query->have_posts()){ $query->the_post();
+			if ( $query->have_posts() ) {
+				while( $query->have_posts() ) { $query->the_post();
 					// allow just svg-related info (used for wp_kses)
 					$allowed = array(
 						'svg' => array(
@@ -218,24 +248,34 @@ Class Aqua_SVG_Sprite {
 						),
 					);
 					// get the id via acf or through the post data if is current post
-					$svg_id = (get_the_id() !== $post_id ? get_field('svg') : $_POST['acf']['field_58d70aee44096']);
+					$svg_id = ( get_the_id() !== $post_id ? get_field( 'svg' ) : $_POST['acf']['field_58d70aee44096'] );
 					// establish the slug (used as id for sprite)
-					$slug = strtolower(trim(preg_replace('/[\s-]+/', '-', preg_replace('/[^A-Za-z0-9-]+/', '-', preg_replace('/[&]/', 'and', preg_replace('/[\']/', '', iconv('UTF-8', 'ASCII//TRANSLIT', get_the_title()))))), '-'));
+					$slug = strtolower( trim( preg_replace( '/[\s-]+/', '-', preg_replace( '/[^A-Za-z0-9-]+/', '-', preg_replace( '/[&]/', 'and', preg_replace( '/[\']/', '', iconv('UTF-8', 'ASCII//TRANSLIT', get_the_title() ) ) ) ) ), '-' ) );
 					// create svg code and strip out unneeded elements
 					$svg = file_get_contents(get_attached_file(wp_kses($svg_id, $allowed)));
-					$svg = preg_replace('#\s(id|class)="[^"]+"#', '', $svg);
-					$svg = preg_replace('/<svg/i', '<symbol id="'.$slug.'"', $svg);
-					$svg = preg_replace('/<\/svg>/i', '</symbol>', $svg);
+					// get rid of classes and ids
+					$svg = preg_replace( '#\s(id|class)="[^"]+"#', '', $svg );
+					// get rid of <?xml ...
+					$svg = preg_replace( '/\s*<\?xml.*?>/i', '', $svg );
+					// get rid of comments
+					$svg = preg_replace( '/\s*<\!--.*?-->/i', '', $svg );
+					// change svg to symbol
+					$svg = preg_replace( '/<svg/i', '<symbol id="'.$slug.'"', $svg );
+					$svg = preg_replace( '/<\/svg>/i', '</symbol>', $svg );
+					// // get rid of xml namespaces (should be on <svg> instead of <symbol>)
+					$svg = preg_replace( '/\s*xmlns.*?".*?"/i', '', $svg );
 					// add this svg to the sprite
-					$svg_sprite .= $svg;
+					$svg_symbols .= $svg;
 				}
 			}
-			// close the sprite wrapper
+			// wrap svg internals
+			$svg_sprite = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">';
+			$svg_sprite .= $svg_symbols;
 			$svg_sprite .= '</svg>';
 			// create the svg file (rebuilds each time)
 			file_put_contents( $aqua_svg_sprite_dir . '/aqua-svg-sprite.svg', $svg_sprite );
 			// update the featured image to the uploaded image (allows acf relationship fields to show previews)
-			update_post_meta($post_id, '_thumbnail_id', $_POST['acf']['field_58d70aee44096']);
+			update_post_meta( $post_id, '_thumbnail_id', $_POST['acf']['field_58d70aee44096'] );
 		}
 
 	}
