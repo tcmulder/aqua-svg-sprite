@@ -4,7 +4,7 @@ Contributors: tcmulder
 Tags: svg sprite, svg, sprite, acf
 Requires at least: 4.7.1
 Tested up to: 4.8.1
-Stable tag: 0.0.3
+Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,6 +28,11 @@ Currently the API is pretty limited. A call to `aqua_svg('slug')` will output  s
 2. Activate the plugin through the "Plugins" menu in WordPress.
 
 == Changelog ==
+
+= 1.0.0 =
+
+* Add ability to have multiple sprites.
+* Overhaul API.
 
 = 0.0.4 =
 
