@@ -1,6 +1,6 @@
 <?php
 /**
- * Aqua Sprite SVG Code
+ * Generate Aqua Sprite SVG code.
  *
  * Generates <svg><use></use></svg> code for a particular sprite via its slug.
  *

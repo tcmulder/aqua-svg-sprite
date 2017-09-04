@@ -5,7 +5,7 @@ Class Aqua_SVG_Sprite {
 	private static $initiated = false;
 
 	/**
-	 * Kick off first things
+	 * Kick off first things.
 	 */
 	public static function init() {
 		if ( ! self::$initiated ) {
@@ -13,8 +13,38 @@ Class Aqua_SVG_Sprite {
 		}
 	}
 
+	 /**
+	 * Allow for upload of svg files.
+	 * workaround needed, see: https://codepen.io/chriscoyier/post/wordpress-4-7-1-svg-upload
+	 */
+	public static function add_svg_mime_type ( $data, $file, $filename, $mimes ) {
+
+	  $filetype = wp_check_filetype( $filename, $mimes );
+
+	  return [
+		  'ext'             => $filetype['ext'],
+		  'type'            => $filetype['type'],
+		  'proper_filename' => $data['proper_filename']
+	  ];
+
+	}
+
+	public static function cc_mime_types( $mimes ){
+	  $mimes['svg'] = 'image/svg+xml';
+	  return $mimes;
+	}
+
+	public static function fix_svg() {
+	  echo '<style type="text/css">
+			#postimagediv .inside img, .thumbnail img {
+				 width: 100% !important;
+				 height: auto !important;
+			}
+			</style>';
+	}
+
 	/**
-	 * Attach methods to hooks
+	 * Attach methods to hooks.
 	 */
 	public static function init_hooks() {
 		self::$initiated = true;
@@ -24,22 +54,13 @@ Class Aqua_SVG_Sprite {
 		add_filter( 'upload_mimes', array( 'Aqua_SVG_Sprite', 'cc_mime_types' ) );
 		add_action( 'admin_head', array( 'Aqua_SVG_Sprite', 'fix_svg' ) );
 		add_action( 'acf/save_post', array( 'Aqua_SVG_Sprite', 'create_svg_sprite' ), 1 );
-
-
-
-
-
-
 		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'save_group_meta_box' ) );
 		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'save_group_meta_box' ) );
-		add_action( 'edit_form_top', array( 'Aqua_SVG_Sprite', 'show_required_field_error_msg' ) );
-
 		add_action( 'save_post', array( 'Aqua_SVG_Sprite', 'set_default_object_terms' ), 0, 2 );
-
 	}
 
 	/**
-	 * Create field for uploading svg files
+	 * Create field for uploading svg files.
 	 */
 	public static function create_acf_feields() {
 
@@ -113,7 +134,7 @@ Class Aqua_SVG_Sprite {
 	}
 
 	/**
-	 * Create message to users for the field
+	 * Create message to users for the field.
 	 */
 	public static function field_message() {
 		// describe requirements
@@ -150,7 +171,7 @@ Class Aqua_SVG_Sprite {
 	}
 
 	/**
-	 * Create custom post type for svg files
+	 * Create custom post type for svg files.
 	 */
 	public static function create_svg_post_type() {
 
@@ -228,105 +249,66 @@ Class Aqua_SVG_Sprite {
 
 	}
 
-
-
-
-
-
-
-
-
-
-
-
 	/**
-	 * Display Movie Rating meta box
+	 * Add meta box for sprite group.
+	 *
+	 * @link http://sudarmuthu.com/blog/creating-single-select-wordpress-taxonomies/
+	 * @param obj post object
 	 */
 	function group_meta_box( $post ) {
 		$terms = get_terms( 'aqua_svg_sprite_group', array( 'hide_empty' => false ) );
 		$post  = get_post();
-		$rating = wp_get_object_terms( $post->ID, 'aqua_svg_sprite_group', array( 'orderby' => 'term_id', 'order' => 'ASC' ) );
+		$group = wp_get_object_terms( $post->ID, 'aqua_svg_sprite_group', array( 'orderby' => 'term_id', 'order' => 'ASC' ) );
 		$name  = '';
-		if ( ! is_wp_error( $rating ) ) {
-			if ( isset( $rating[0] ) && isset( $rating[0]->name ) ) {
-				$name = $rating[0]->name;
+		if ( ! is_wp_error( $group ) ) {
+			if ( isset( $group[0] ) && isset( $group[0]->name ) ) {
+				$name = $group[0]->name;
 			}
 		}
 		foreach ( $terms as $term ) {
-	?>
-			<label title='<?php esc_attr_e( $term->name ); ?>'>
-				<input type="radio" name="aqua_sprite_group" value="<?php esc_attr_e( $term->name ); ?>" <?php checked( $term->name, $name ); ?>>
-				<span><?php esc_html_e( $term->name ); ?></span>
-			</label><br>
-	<?php
+			echo '<label title="' . __( esc_attr( $term->name ) ) . '">';
+				echo '<input type="radio" name="aqua_sprite_group" value="' . __( esc_attr( $term->name ) ) . '" ' . checked( $term->name, $name, false ) . '>';
+				echo '<span>' . esc_html_e( $term->name ) . '</span>';
+			echo '</label><br>';
 		}
 	}
 
-
-
-
-
 	/**
-	 * Save the movie meta box results.
+	 * Save the sprite group meta box results.
 	 *
+	 * @link http://sudarmuthu.com/blog/creating-single-select-wordpress-taxonomies/
 	 * @param int $post_id The ID of the post that's being saved.
 	 */
 	function save_group_meta_box( $post_id ) {
+		// handle autosaves
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return;
 		}
+		// don't do stuff if this doesn't even have the meta box
 		if ( ! isset( $_POST['aqua_sprite_group'] ) ) {
 			return;
 		}
-		$rating = sanitize_text_field( $_POST['aqua_sprite_group'] );
-
-		if ( ! empty( $rating ) ) {
-			$term = get_term_by( 'name', $rating, 'aqua_svg_sprite_group' );
+		// get the value inpu
+		$group = sanitize_text_field( $_POST['aqua_sprite_group'] );
+		// if there is a value then update the term
+		if ( ! empty( $group ) ) {
+			$term = get_term_by( 'name', $group, 'aqua_svg_sprite_group' );
 			if ( ! empty( $term ) && ! is_wp_error( $term ) ) {
 				wp_set_object_terms( $post_id, $term->term_id, 'aqua_svg_sprite_group', false );
 			}
 		}
 	}
 
-
-
-
-
-	/**
-	 * Display an error message at the top of the post edit screen explaining that ratings is required.
-	 *
-	 * Doing this prevents users from getting confused when their new posts aren't published, as we
-	 * require a valid rating custom taxonomy.
-	 *
-	 * @param WP_Post The current post object.
-	 */
-	function show_required_field_error_msg( $post ) {
-		if ( 'aqua_svg_sprite' === get_post_type( $post ) && 'auto-draft' !== get_post_status( $post ) ) {
-			$rating = wp_get_object_terms( $post->ID, 'aqua_svg_sprite_group', array( 'orderby' => 'term_id', 'order' => 'ASC' ) );
-			if ( is_wp_error( $rating ) || empty( $rating ) ) {
-				printf(
-					'<div class="error below-h2"><p>%s</p></div>',
-					esc_html__( 'Rating is mandatory for creating a new movie post' )
-				);
-			}
-		}
-	}
-
-
-
-
-
-
 	/**
 	* Add an automatic default custom taxonomy for custom post type.
 	* If no story (taxonomy) is set, the comic post will be sorted as “draft” and won’t return an offset error.
-	*
+	* @link https://gist.github.com/mayeenulislam/f208b4fd408fd4742c06
 	*/
 	function set_default_object_terms( $post_id, $post ) {
-		if ( 'publish' === $post->post_status && $post->post_type === 'aqua_svg_sprite' ) {
-			$defaults = array(
-				'aqua_svg_sprite_group' => array( 'general' )
-			);
+		// only for the aqua sprites
+		if ( 'publish' === $post->post_status && 'aqua_svg_sprite' === $post->post_type ) {
+			// set default to "general" nothing is selected
+			$defaults = array( 'aqua_svg_sprite_group' => array( 'general' ) );
 			$taxonomies = get_object_taxonomies( $post->post_type );
 			foreach ( (array) $taxonomies as $taxonomy ) {
 				$terms = wp_get_post_terms( $post_id, $taxonomy );
@@ -337,57 +319,8 @@ Class Aqua_SVG_Sprite {
 		}
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	 /**
-	 * Allow for upload of svg files
-	 * workaround needed, see: https://codepen.io/chriscoyier/post/wordpress-4-7-1-svg-upload
-	 */
-	public static function add_svg_mime_type ( $data, $file, $filename, $mimes ) {
-
-	  $filetype = wp_check_filetype( $filename, $mimes );
-
-	  return [
-		  'ext'             => $filetype['ext'],
-		  'type'            => $filetype['type'],
-		  'proper_filename' => $data['proper_filename']
-	  ];
-
-	}
-
-	public static function cc_mime_types( $mimes ){
-	  $mimes['svg'] = 'image/svg+xml';
-	  return $mimes;
-	}
-
-	public static function fix_svg() {
-	  echo '<style type="text/css">
-			#postimagediv .inside img, .thumbnail img {
-				 width: 100% !important;
-				 height: auto !important;
-			}
-			</style>';
-	}
-
 	/**
-	* Rebuild svg sprite on save of svg post type posts
+	* Rebuild svg sprite on save of svg post type posts.
 	*/
 	public static function create_svg_sprite( $post_id ) {
 
