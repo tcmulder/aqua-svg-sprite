@@ -138,7 +138,7 @@ Class Aqua_SVG_Sprite {
 			<p>
 				Full options are as follows:
 				<br>
-				<code>aqua_svg( string $slug, string $viewbox = \'\', string $attr = \'\', boolean $echo = true );</code>
+				<code>aqua_svg( string $slug, string $sprite = \'general\', array $attr( string \'viewbox\' => \'\', string \'html_attr\' => \'\', boolean echo = true ) );</code>
 			</p>
 
 			';
