@@ -15,28 +15,26 @@
  * @param array		$attr 		Additional options, for viewbox (e.g. '0 0 1000 1000', defaults to ''), html_attr (e.g. 'width="100"', defaults to '') and echo (true|false, defaults to true)
  * @return string|null
  */
-function aqua_svg ( $slug, $sprite = 'general', $attr = array() ) {
-	// grab optional attributes or set to defaults
-	$viewbox   = ( isset( $attr[ 'viewbox' ] ) ? $attr[ 'viewbox' ] : '' );
-	$html_attr = ( isset( $attr[ 'html_attr' ] ) ? $attr[ 'html_attr' ] : '' );
-	$echo      = ( isset( $attr[ 'echo' ] ) ? $attr[ 'echo' ] : true );
+function aqua_svg ( $slug, $sprite = 'general', $echo = true, $attr = array() ) {
 
-	// if viewbox was set then create html
-	if ( $viewbox ) {
-		$viewbox = ' viewBox="' . $viewbox . '"';
-	}
 	// if other attributes were set then create html
-	if ( $html_attr ) {
-		$html_attr = ' ' . $html_attr;
+	$attr_html = '';
+	if ( ! empty( $attr ) ) {
+		foreach ( $attr as $key => $value ) {
+			$attr_html .= ' ' . $key . '="' . $value . '"';
+		}
 	}
 	// get the url for the sprite
 	$aqua_svg_sprite_file = WP_CONTENT_URL . '/uploads/aqua-svg-sprite/aqua-svg-' . $sprite . '-sprite.svg';
 	// create the full svg sprite html
-	$svg_code = '<svg' . $viewbox . $html_attr . '><use xlink:href="' . $aqua_svg_sprite_file . '#' . $slug . '"' . '></use></svg>';
+	$svg_code = '<svg' . $attr_html . '><use xlink:href="' . $aqua_svg_sprite_file . '#' . $slug . '"' . '></use></svg>';
 	// echo it or return it based on $echo value
 	if ( $echo ) {
 		echo $svg_code;
+		// echo ($attr_html ? $attr_html : 'false');//$svg_code;
 	} else {
 		return $svg_code;
+		// return ($attr_html ? $attr_html : 'false');//$svg_code;
 	}
+
 }
