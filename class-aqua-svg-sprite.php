@@ -48,7 +48,6 @@ Class Aqua_SVG_Sprite {
 	 */
 	public static function init_hooks() {
 		self::$initiated = true;
-		add_action( 'acf/init', array( 'Aqua_SVG_Sprite', 'create_acf_feields' ) );
 		add_action( 'init', array( 'Aqua_SVG_Sprite', 'create_svg_post_type' ) );
 		add_filter( 'wp_check_filetype_and_ext', array( 'Aqua_SVG_Sprite', 'add_svg_mime_type' ), 10, 4 );
 		add_filter( 'upload_mimes', array( 'Aqua_SVG_Sprite', 'cc_mime_types' ) );
@@ -57,6 +56,88 @@ Class Aqua_SVG_Sprite {
 		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'save_group_meta_box' ) );
 		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'save_group_meta_box' ) );
 		add_action( 'save_post', array( 'Aqua_SVG_Sprite', 'set_default_object_terms' ), 0, 2 );
+	}
+
+	/**
+	 * Create custom post type for svg files.
+	 */
+	public static function create_svg_post_type() {
+
+		// create taxonomy first
+		register_taxonomy(
+			'aqua_svg_sprite_group',
+			'aqua_svg_sprite',
+			array(
+				'labels' => array(
+					'name'                       => 'Sprite Groups', 'Taxonomy General Name', 'aqua_svg_sprite',
+					'singular_name'              => 'Sprite Group', 'Taxonomy Singular Name', 'aqua_svg_sprite',
+					'menu_name'                  => 'Sprite Groups', 'aqua_svg_sprite',
+					'all_items'                  => 'All Items', 'aqua_svg_sprite',
+					'parent_item'                => 'Parent Item', 'aqua_svg_sprite',
+					'parent_item_colon'          => 'Parent Item:', 'aqua_svg_sprite',
+					'new_item_name'              => 'New Item Name', 'aqua_svg_sprite',
+					'add_new_item'               => 'Add New Item', 'aqua_svg_sprite',
+					'edit_item'                  => 'Edit Item', 'aqua_svg_sprite',
+					'update_item'                => 'Update Item', 'aqua_svg_sprite',
+					'separate_items_with_commas' => 'Separate items with commas', 'aqua_svg_sprite',
+					'search_items'               => 'Search Items', 'aqua_svg_sprite',
+					'add_or_remove_items'        => 'Add or remove items', 'aqua_svg_sprite',
+					'choose_from_most_used'      => 'Choose from the most used items', 'aqua_svg_sprite',
+					'not_found'                  => 'Not Found', 'aqua_svg_sprite',
+				),
+				'meta_box_cb'       => array ( 'Aqua_SVG_Sprite', 'group_meta_box' ),
+				'capabilities' => array(
+					'manage__terms' => 'edit_posts',
+					'edit_terms'    => 'manage_categories',
+					'delete_terms'  => 'manage_categories',
+					'assign_terms'  => 'edit_posts'
+				)
+			)
+		);
+
+		// create post type
+		register_post_type( 'aqua_svg_sprite',
+			array(
+				'labels'       => array(
+					'name'                       => 'SVG Sprite', 'Taxonomy General Name', 'aqua_svg_sprite',
+					'singular_name'              => 'SVG Sprite', 'Taxonomy Singular Name', 'aqua_svg_sprite',
+					'menu_name'                  => 'SVG Sprite', 'aqua_svg_sprite',
+					'all_items'                  => 'All Items', 'aqua_svg_sprite',
+					'parent_item'                => 'Parent Item', 'aqua_svg_sprite',
+					'parent_item_colon'          => 'Parent Item:', 'aqua_svg_sprite',
+					'new_item_name'              => 'New Item Name', 'aqua_svg_sprite',
+					'add_new_item'               => 'Add New Item', 'aqua_svg_sprite',
+					'edit_item'                  => 'Edit Item', 'aqua_svg_sprite',
+					'update_item'                => 'Update Item', 'aqua_svg_sprite',
+					'separate_items_with_commas' => 'Separate items with commas', 'aqua_svg_sprite',
+					'search_items'               => 'Search Items', 'aqua_svg_sprite',
+					'add_or_remove_items'        => 'Add or remove items', 'aqua_svg_sprite',
+					'choose_from_most_used'      => 'Choose from the most used items', 'aqua_svg_sprite',
+					'not_found'                  => 'Not Found', 'aqua_svg_sprite',
+				),
+				'menu_icon' => 'dashicons-images-alt',
+				'public' => false,
+				'show_ui' => true,
+				'menu_position' => 100, // bottom-ish
+				'supports' => array(
+					'editor',
+					'custom-fields',
+					'title',
+					'page-attributes',
+					'thumbnail',
+				),
+			)
+		);
+
+		// create a default term
+		wp_insert_term( 'General', 'aqua_svg_sprite_group' );
+
+		// connect the two
+		register_taxonomy_for_object_type( 'aqua_svg_sprite_group', 'aqua_svg_sprite' );
+
+		// create ACF fields (must be called after init builds taxonomies: normally called by acf/init instead)
+		self::create_acf_feields();
+
 	}
 
 	/**
@@ -150,16 +231,34 @@ Class Aqua_SVG_Sprite {
 		';
 		// provide API helpers
 		if ( get_post_field( 'post_name', $_GET['post'] ) ) {
+			// get this post's slug
+			$slug = get_post_field( 'post_name', $_GET['post'] );
+			// get the sprite this is part of (can only be one)
+			$term_arr = wp_get_post_terms( $_GET['post'], 'aqua_svg_sprite_group' );
+			$first_term_obj = $term_arr[0];
+			$term_id = $first_term_obj->term_taxonomy_id;
+			$term_obj = get_term_by( 'id', $term_id, 'aqua_svg_sprite_group' );
+			$sprite_slug = $term_obj->slug;
+			// set up the message text
 			$message .='
 			<p>
-				Output this sprite item with default settings as follows:
-				<br>
-				<code>aqua_svg( \'' . get_post_field( 'post_name', $_GET['post'] ) . '\' );</code>
+				Output this sprite item with default settings like so:
+				<code>&lt;?php aqua_svg( \'' . $slug . '\'' . ( 'general' !== $sprite_slug ? ', \'' . $sprite_slug . '\'' : '' ) . ' ); ?&gt;</code>
+				.
 			</p>
 			<p>
-				Full options are as follows:
+				Example using all options:
 				<br>
-				<code>aqua_svg( string $slug, string $sprite = \'general\', array $attr( string \'viewbox\' => \'\', string \'html_attr\' => \'\', boolean echo = true ) );</code>
+<pre><code>&lt;?php
+/* Get Sprite String and Echo */
+$slug = \''. $slug .'\';
+$sprite = \'' . $sprite_slug . '\';
+$attr = array(
+	\'viewbox\' => \'0 0 1000 1000\',
+	\'fill\' => \'aquamarine\',
+);
+aqua_svg($slug,  $sprite, $attr );
+?&gt;</code></pre>
 			</p>
 
 			';
@@ -167,85 +266,6 @@ Class Aqua_SVG_Sprite {
 			$message .= '<p><em>(helpful API docs will appear here once you save the post)</em></p>';
 		}
 		return $message;
-
-	}
-
-	/**
-	 * Create custom post type for svg files.
-	 */
-	public static function create_svg_post_type() {
-
-		// create post type
-		register_post_type( 'aqua_svg_sprite',
-			array(
-				'labels'       => array(
-					'name'                       => 'SVG Sprite', 'Taxonomy General Name', 'aqua_svg_sprite',
-					'singular_name'              => 'SVG Sprite', 'Taxonomy Singular Name', 'aqua_svg_sprite',
-					'menu_name'                  => 'SVG Sprite', 'aqua_svg_sprite',
-					'all_items'                  => 'All Items', 'aqua_svg_sprite',
-					'parent_item'                => 'Parent Item', 'aqua_svg_sprite',
-					'parent_item_colon'          => 'Parent Item:', 'aqua_svg_sprite',
-					'new_item_name'              => 'New Item Name', 'aqua_svg_sprite',
-					'add_new_item'               => 'Add New Item', 'aqua_svg_sprite',
-					'edit_item'                  => 'Edit Item', 'aqua_svg_sprite',
-					'update_item'                => 'Update Item', 'aqua_svg_sprite',
-					'separate_items_with_commas' => 'Separate items with commas', 'aqua_svg_sprite',
-					'search_items'               => 'Search Items', 'aqua_svg_sprite',
-					'add_or_remove_items'        => 'Add or remove items', 'aqua_svg_sprite',
-					'choose_from_most_used'      => 'Choose from the most used items', 'aqua_svg_sprite',
-					'not_found'                  => 'Not Found', 'aqua_svg_sprite',
-				),
-				'menu_icon' => 'dashicons-images-alt',
-				'public' => false,
-				'show_ui' => true,
-				'menu_position' => 100, // bottom-ish
-				'supports' => array(
-					'editor',
-					'custom-fields',
-					'title',
-					'page-attributes',
-					'thumbnail',
-				),
-			)
-		);
-
-		// create taxonomy
-		register_taxonomy(
-			'aqua_svg_sprite_group',
-			'aqua_svg_sprite',
-			array(
-				'labels' => array(
-					'name'                       => 'Sprite Groups', 'Taxonomy General Name', 'aqua_svg_sprite',
-					'singular_name'              => 'Sprite Group', 'Taxonomy Singular Name', 'aqua_svg_sprite',
-					'menu_name'                  => 'Sprite Groups', 'aqua_svg_sprite',
-					'all_items'                  => 'All Items', 'aqua_svg_sprite',
-					'parent_item'                => 'Parent Item', 'aqua_svg_sprite',
-					'parent_item_colon'          => 'Parent Item:', 'aqua_svg_sprite',
-					'new_item_name'              => 'New Item Name', 'aqua_svg_sprite',
-					'add_new_item'               => 'Add New Item', 'aqua_svg_sprite',
-					'edit_item'                  => 'Edit Item', 'aqua_svg_sprite',
-					'update_item'                => 'Update Item', 'aqua_svg_sprite',
-					'separate_items_with_commas' => 'Separate items with commas', 'aqua_svg_sprite',
-					'search_items'               => 'Search Items', 'aqua_svg_sprite',
-					'add_or_remove_items'        => 'Add or remove items', 'aqua_svg_sprite',
-					'choose_from_most_used'      => 'Choose from the most used items', 'aqua_svg_sprite',
-					'not_found'                  => 'Not Found', 'aqua_svg_sprite',
-				),
-				'meta_box_cb'       => array ( 'Aqua_SVG_Sprite', 'group_meta_box' ),
-				'capabilities' => array(
-					'manage__terms' => 'edit_posts',
-					'edit_terms'    => 'manage_categories',
-					'delete_terms'  => 'manage_categories',
-					'assign_terms'  => 'edit_posts'
-				)
-			)
-		);
-
-		// create a default term
-		wp_insert_term( 'General', 'aqua_svg_sprite_group' );
-
-		// connect the two
-		register_taxonomy_for_object_type( 'aqua_svg_sprite_group', 'aqua_svg_sprite' );
 
 	}
 
