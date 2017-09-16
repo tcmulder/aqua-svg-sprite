@@ -330,7 +330,7 @@ Class Aqua_SVG_Sprite {
 			$aqua_svg_sprite_dir = $wp_upload_dir['basedir'] . '/aqua-svg-sprite';
 			// create the directory if it doesn't already exist
 			if ( ! file_exists( $aqua_svg_sprite_dir ) ) {
-				mkdir( $aqua_svg_sprite_dir, 0777, true );
+				mkdir( $aqua_svg_sprite_dir, 0755, true );
 			}
 			// get the post term (there will only be one)
 			$term = 'general';

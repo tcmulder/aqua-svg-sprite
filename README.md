@@ -29,6 +29,11 @@ Currently the API is pretty limited. A call to `aqua_svg('slug')` will output  s
 
 == Changelog ==
 
+= 2.0.0 =
+
+* Change API.
+* Update created directory permissions.
+
 = 1.0.0 =
 
 * Add ability to have multiple sprites.
