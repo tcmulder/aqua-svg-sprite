@@ -48,7 +48,7 @@ function aqua_svg ( $slug, $sprite = 'general', $echo = true, $attr = array() ) 
  * example:
  *   [aqua-svg slug="some-slug"]
  * or a more complex example:
- *   [aqua-svg slug="some-slug" sprite="some-sprite" attr="width=10,height=10,fill=red"]
+ *   [aqua-svg slug="some-slug" sprite="some-sprite" attr="viewbox=0 0 1000 1000,fill=aquamarine"]
  *
  * @param string	$slug 		The slug (i.e. post slug, also the symbol's ID in the sprite) for which to fetch code. Required.
  * @param string	$sprite 	The sprite to use (i.e. the slug of the sprite term). Defaults to 'general'.
