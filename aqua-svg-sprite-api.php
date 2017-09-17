@@ -89,3 +89,24 @@ function aqua_svg_sprite_shortcode( $attr ) {
 	return aqua_svg( $slug, $sprite, false, $html_attr );
 
 }
+
+// check if wysiwyg is enabled
+function custom_mce_buttons() {
+    if ( get_user_option( 'rich_editing' ) == 'true' ) {
+        add_filter( 'mce_external_plugins', 'custom_tinymce_plugin' );
+        add_filter( 'mce_buttons', 'register_mce_buttons' );
+    }
+}
+add_action('admin_head', 'custom_mce_buttons');
+
+// add the path to the js file with the custom button function
+function custom_tinymce_plugin( $plugin_array ) {
+    $plugin_array['custom_mce_button1'] = AQUA_SVG_SPRITE_PLUGIN_URI .'assets/js/buttons.js';
+    return $plugin_array;
+}
+
+// register and add new button in the editor
+function register_mce_buttons( $buttons ) {
+    array_push( $buttons, 'custom_mce_button1' );
+    return $buttons;
+}
