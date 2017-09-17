@@ -14,12 +14,33 @@ Creates an SVG sprite.
 
 This plugin allows you to create an SVG sprite by uploading individual files to the WordPress media library.
 
-Currently the API is pretty limited. A call to `aqua_svg('slug')` will output  svg use code for the sprite with an ID (post slug) of "slug". You can also pass in viewbox, additional attributes, and tell it to echo or not echo like so:
+A call to `aqua_svg( 'some-slug' )` will output  SVG <use> code for the sprite with an ID (post slug) of "some-slug". If you tag an image with a different sprite group than the default "general" one, you access those by calling `aqua_svg( 'some-slug', 'some-group' )`.
+
+You can also use shortcodes, like `[aqua-svg slug="some-slug"]` or `[aqua-svg slug="some-slug" sprite="some-group"]` to achieve the same as the above paragraph.
+
+Full PHP usage options are as follows:
+```
+aqua_svg( string $slug, string $sprite = 'general', boolean echo = true, array $attr( 'attribute' => 'value' ) )
+```
+
+For example:
 ```
 <?php
-    $svg_use = aqua_svg('slug', '0 0 1000 1000', 'width="100" height="100"', false);
-    echo $svg_use;
+    // echo the "some-slug" svg from the default "general" group
+    aqua_svg( 'some-slug' );
+    
+    // store (not echo) the "some-slug" from the "some-sprite" group, adding
+    // viewbox and fill properties.
+    $svg_string = aqua_svg( 'some-slug', 'some-sprite', false, array( 'viewbox' => '0 0 1000 1000', 'fill' => 'aquamarine' ) );
+    
+    // echo it manually
+    echo $svg_string;
 ?>
+```
+
+You can achieve the same thing using the short code. Notice in particular that there is no echo option, and there's a pseudo-array format for properties:
+```
+[aqua-svg slug="some-slug" sprite="some-sprite" attr="viewbox=0 0 1000 1000,fill=aquamarine"]
 ```
 
 == Installation ==
@@ -28,6 +49,12 @@ Currently the API is pretty limited. A call to `aqua_svg('slug')` will output  s
 2. Activate the plugin through the "Plugins" menu in WordPress.
 
 == Changelog ==
+
+= 2.0.0 =
+
+* Change PHP API.
+* Add shortcode.
+* Update created directory permissions.
 
 = 1.0.0 =
 
