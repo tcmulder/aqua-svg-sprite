@@ -241,25 +241,24 @@ Class Aqua_SVG_Sprite {
 			$sprite_slug = $term_obj->slug;
 			// set up the message text
 			$message .='
-			<p>
-				Output this sprite item with default settings like so:
-				<code>&lt;?php aqua_svg( \'' . $slug . '\'' . ( 'general' !== $sprite_slug ? ', \'' . $sprite_slug . '\'' : '' ) . ' ); ?&gt;</code>
-				.
-			</p>
-			<p>
-				Example using all options:
-				<br>
+			<p><strong>Basic shortcode usage:</strong></p>
+			<code>[aqua-svg slug="' . $slug . '"' . ( 'general' !== $sprite_slug ? ' sprite="' . $sprite_slug . '"' : '' ) . ']</code>
+			<p><strong>More complex shortcode example:</strong></p>
+			<code>[aqua-svg slug="' . $slug . '" sprite="' . $sprite_slug . '" attr="viewbox=0 0 1000 1000,fill=aquamarine"]</code>
+			<p><strong>PHP usage:</strong></p>
+			<code>&lt;?php aqua_svg( \'' . $slug . '\'' . ( 'general' !== $sprite_slug ? ', \'' . $sprite_slug . '\'' : '' ) . ' ); ?&gt;</code>
+			<p><strong>More complex PHP example:</strong></p>
 <pre><code>&lt;?php
-/* Get Sprite String and Echo */
-$slug = \''. $slug .'\';
-$sprite = \'' . $sprite_slug . '\';
-$attr = array(
-	\'viewbox\' => \'0 0 1000 1000\',
-	\'fill\' => \'aquamarine\',
-);
-aqua_svg($slug,  $sprite, $attr );
+  /* Get Sprite String and Echo */
+  $slug = \''. $slug .'\';
+  $sprite = \'' . $sprite_slug . '\';
+  $echo = false;
+  $attr = array(
+    \'viewbox\' => \'0 0 1000 1000\',
+    \'fill\' => \'aquamarine\',
+  );
+  echo aqua_svg( $slug, $sprite, $echo, $attr );
 ?&gt;</code></pre>
-			</p>
 
 			';
 		} else {
