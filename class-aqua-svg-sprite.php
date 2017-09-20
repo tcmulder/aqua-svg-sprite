@@ -52,12 +52,14 @@ Class Aqua_SVG_Sprite {
 		add_filter( 'wp_check_filetype_and_ext', array( 'Aqua_SVG_Sprite', 'add_svg_mime_type' ), 10, 4 );
 		add_filter( 'upload_mimes', array( 'Aqua_SVG_Sprite', 'cc_mime_types' ) );
 		add_action( 'admin_head', array( 'Aqua_SVG_Sprite', 'fix_svg' ) );
-		add_action( 'acf/save_post', array( 'Aqua_SVG_Sprite', 'create_svg_sprite' ), 1 );
-		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'save_group_meta_box' ) );
-		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'save_group_meta_box' ) );
+		add_action( 'save_post', array( 'Aqua_SVG_Sprite', 'create_svg_sprite' ) );
 		add_action( 'save_post', array( 'Aqua_SVG_Sprite', 'set_default_object_terms' ), 0, 2 );
+		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'save_group_meta_box' ) );
+		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'save_group_meta_box' ) );
 		add_action( 'admin_head', array( 'Aqua_SVG_Sprite', 'register_shortcode_button' ) );
 		add_action( 'before_wp_tiny_mce', array( 'Aqua_SVG_Sprite', 'localize_shortcode_button_scripts' ) );
+		add_action( 'add_meta_boxes', array( 'Aqua_SVG_Sprite', 'aqua_svg_add_meta_boxes' ) );
+		add_action( 'save_post', array( 'Aqua_SVG_Sprite', 'save_aqua_svg_sprite_meta_box' ) );
 	}
 
 	/**
@@ -122,7 +124,6 @@ Class Aqua_SVG_Sprite {
 				'show_ui' => true,
 				'menu_position' => 100, // bottom-ish
 				'supports' => array(
-					'editor',
 					'custom-fields',
 					'title',
 					'page-attributes',
@@ -137,31 +138,28 @@ Class Aqua_SVG_Sprite {
 		// connect the two
 		register_taxonomy_for_object_type( 'aqua_svg_sprite_group', 'aqua_svg_sprite' );
 
-		// create ACF fields (must be called after init builds taxonomies: normally called by acf/init instead)
-		self::create_acf_feields();
-
 	}
 
 	/**
 	 * Create SVG insert button
 	 */
 	public static function register_shortcode_button() {
-	    if ( get_user_option( 'rich_editing' ) == 'true' ) {
-	        add_filter( 'mce_external_plugins', array( 'Aqua_SVG_Sprite', 'add_shortcode_script' ) );
-	        add_filter( 'mce_buttons', array( 'Aqua_SVG_Sprite', 'register_mce_buttons' ) );
-	    }
+		if ( get_user_option( 'rich_editing' ) == 'true' ) {
+			add_filter( 'mce_external_plugins', array( 'Aqua_SVG_Sprite', 'add_shortcode_script' ) );
+			add_filter( 'mce_buttons', array( 'Aqua_SVG_Sprite', 'register_mce_buttons' ) );
+		}
 	}
 
 	// add the path to the js file with the custom button function
 	public static function add_shortcode_script( $plugin_array ) {
-	    $plugin_array['aqua_svg_sprite_button'] = AQUA_SVG_SPRITE_PLUGIN_URI .'assets/js/tinymce-button.js';
-	    return $plugin_array;
+		$plugin_array['aqua_svg_sprite_button'] = AQUA_SVG_SPRITE_PLUGIN_URI .'assets/js/tinymce-button.js';
+		return $plugin_array;
 	}
 
 	// register and add new button in the editor
 	public static function register_mce_buttons( $buttons ) {
-	    array_push( $buttons, 'aqua_svg_sprite_button' );
-	    return $buttons;
+		array_push( $buttons, 'aqua_svg_sprite_button' );
+		return $buttons;
 	}
 
 	// localize scripts for button
@@ -205,75 +203,83 @@ Class Aqua_SVG_Sprite {
 	/**
 	 * Create field for uploading svg files.
 	 */
-	public static function create_acf_feields() {
+	public static function meta_box_backend( $post ) {
+		wp_nonce_field( 'aqua_svg_sprite_submit', 'aqua_svg_sprite_nonce' );
+		$stored_meta = get_post_meta( $post->ID );
+		$stored_id = ( isset ( $stored_meta['aqua-svg'] ) ) ? $stored_meta['aqua-svg'][0] : '';
+		$image_arr = wp_get_attachment_image_src( $stored_id );
+		$image = '<span id="aqua-svg-preview">';
+		if ( $image_arr ) {
+			$image = '<img src="' . $image_arr[0] . '" id="aqua-svg-preview" style="max-width:200px;height:auto;" alt="SVG preview image" />';
+		}
+		?>
 
-		if ( function_exists('acf_add_local_field_group') ):
-		acf_add_local_field_group(array (
-			'key' => 'group_58d70ae925cf4',
-			'title' => 'SVG Sprite',
-			'fields' => array (
-				array (
-					'key' => 'field_58d70aee44096',
-					'label' => 'SVG File',
-					'name' => 'svg',
-					'type' => 'image',
-					'instructions' => self::field_message(),
-					'required' => 1,
-					'conditional_logic' => 0,
-					'wrapper' => array (
-						'width' => '',
-						'class' => '',
-						'id' => '',
-					),
-					'return_format' => 'id',
-					'preview_size' => 'thumbnail',
-					'library' => 'all',
-					'min_width' => '',
-					'min_height' => '',
-					'min_size' => '',
-					'max_width' => '',
-					'max_height' => '',
-					'max_size' => '',
-					'mime_types' => '.svg',
-				),
-			),
-			'location' => array (
-				array (
-					array (
-						'param' => 'post_type',
-						'operator' => '==',
-						'value' => 'aqua_svg_sprite',
-					),
-				),
-			),
-			'menu_order' => 0,
-			'position' => 'normal',
-			'style' => 'default',
-			'label_placement' => 'top',
-			'instruction_placement' => 'label',
-			'hide_on_screen' => array (
-				0 => 'permalink',
-				1 => 'the_content',
-				2 => 'excerpt',
-				3 => 'custom_fields',
-				4 => 'discussion',
-				5 => 'comments',
-				6 => 'revisions',
-				7 => 'slug',
-				8 => 'author',
-				9 => 'format',
-				10 => 'page_attributes',
-				11 => 'categories',
-				12 => 'tags',
-				13 => 'send-trackbacks',
-				14 => 'featured_image',
-			),
-			'active' => 1,
-			'description' => '',
-		));
+		<p>
+			<?php echo $image; ?>
+		</p>
+		<p>
+			<input type="hidden" name="aqua-svg" id="aqua-svg" class="meta_image" value="<?php echo $stored_id; ?>" />
+			<input type="button" id="aqua-svg-button" class="button" value="Choose or Upload an Image" />
+		</p>
 
-		endif;
+	<script>
+	jQuery('#aqua-svg-button').click(function() {
 
+		var send_attachment_bkp = wp.media.editor.send.attachment;
+
+		wp.media.editor.send.attachment = function( props, attachment ) {
+			jQuery( '#aqua-svg')
+				.val( attachment.id );
+			jQuery( '#aqua-svg-preview' )
+				.each(function(){
+					var $this = jQuery(this);
+					if ( $this.is( 'img' ) ) {
+						$this.attr( 'src', attachment.url );
+						console.log('no...');
+					} else {
+						var imageHTML = '<img ';
+							imageHTML += 'src="';
+							imageHTML += attachment.url;
+							imageHTML += '" id="aqua-svg-preview"';
+							imageHTML += ' style="max-width:200px;height:auto;"';
+							imageHTML += ' alt="SVG preview image"';
+							imageHTML += ' />';
+						console.log(imageHTML);
+						$this.replaceWith( imageHTML );
+					}
+				} );
+			wp.media.editor.send.attachment = send_attachment_bkp;
+		}
+
+		wp.media.editor.open();
+
+		return false;
+	});
+	</script>
+	<?php
+
+	}
+
+	// add meta boxes to aqua_svg_sprite posts
+	public static function aqua_svg_add_meta_boxes() {
+		add_meta_box( 'aqua-svg-image', 'Aqua SVG Sprite Image', array( 'Aqua_SVG_Sprite', 'meta_box_backend' ), 'aqua_svg_sprite', 'normal', 'low' );
+	}
+
+	// save meta box results
+	public static function save_aqua_svg_sprite_meta_box( $post_id ) {
+		$is_autosave = wp_is_post_autosave( $post_id );
+		$is_revision = wp_is_post_revision( $post_id );
+		$is_valid_nonce = ( isset( $_POST[ 'aqua_svg_sprite_nonce' ] ) && wp_verify_nonce( $_POST[ 'aqua_svg_sprite_nonce' ], 'aqua_svg_sprite_submit' ) ) ? 'true' : 'false';
+
+		// Exits script depending on save status
+		if ( $is_autosave || $is_revision || !$is_valid_nonce  ) {
+			return;
+		}
+
+		// Checks for input and sanitizes/saves if needed
+		if( isset( $_POST['aqua-svg'] ) ) {
+			update_post_meta( $post_id, 'aqua-svg', $_POST['aqua-svg'] );
+		}
 	}
 
 	/**
@@ -316,8 +322,8 @@ Class Aqua_SVG_Sprite {
   $sprite = \'' . $sprite_slug . '\';
   $echo = false;
   $attr = array(
-    \'viewbox\' => \'0 0 1000 1000\',
-    \'fill\' => \'aquamarine\',
+	\'viewbox\' => \'0 0 1000 1000\',
+	\'fill\' => \'aquamarine\',
   );
   echo aqua_svg( $slug, $sprite, $echo, $attr );
 ?&gt;</code></pre>
@@ -459,8 +465,8 @@ Class Aqua_SVG_Sprite {
 							'id' => array(),
 						),
 					);
-					// get the id via acf or through the post data if is current post
-					$svg_id = ( get_the_id() !== $post_id ? get_field( 'svg' ) : $_POST['acf']['field_58d70aee44096'] );
+					// get the id via meta or through the post data if is current post
+					$svg_id = ( get_the_id() !== $post_id ? get_post_thumbnail_id( get_the_id() ) : $_POST['aqua-svg'] );
 					// establish the slug (used as id for sprite)
 					$slug = strtolower( trim( preg_replace( '/[\s-]+/', '-', preg_replace( '/[^A-Za-z0-9-]+/', '-', preg_replace( '/[&]/', 'and', preg_replace( '/[\']/', '', iconv('UTF-8', 'ASCII//TRANSLIT', get_the_title() ) ) ) ) ), '-' ) );
 					// create svg code and strip out unneeded elements
@@ -486,8 +492,8 @@ Class Aqua_SVG_Sprite {
 			$svg_sprite .= '</svg>';
 			// create the svg file (rebuilds each time)
 			file_put_contents( $aqua_svg_sprite_dir . '/aqua-svg-' . $term . '-sprite.svg', $svg_sprite );
-			// update the featured image to the uploaded image (allows acf relationship fields to show previews)
-			update_post_meta( $post_id, '_thumbnail_id', $_POST['acf']['field_58d70aee44096'] );
+			// update the featured image to the uploaded image
+			update_post_meta( $post_id, '_thumbnail_id', $_POST['aqua-svg'] );
 		}
 
 	}

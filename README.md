@@ -4,7 +4,7 @@ Contributors: tcmulder
 Tags: svg sprite, svg, sprite, acf
 Requires at least: 4.7.1
 Tested up to: 4.8.1
-Stable tag: 1.0.0
+Stable tag: 2.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,29 +50,35 @@ You can achieve the same thing using the short code. Notice in particular that t
 
 == Changelog ==
 
+= 2.1.0 =
+
+* TODO: refactor meta box, set meta box script external, hide featured image.
+* Added tinymce shortcode button.
+* Added get_aqua_svg and the_aqua_svg API functions.
+
 = 2.0.0 =
 
-* Change PHP API.
-* Add shortcode.
-* Update created directory permissions.
+* Changed PHP API.
+* Added shortcode.
+* Updated the created directory permissions.
 
 = 1.0.0 =
 
-* Add ability to have multiple sprites.
+* Added ability to have multiple sprites.
 * Overhaul API.
 
 = 0.0.4 =
 
-* Strip more code from <svg> files for better <symbol> support.
-* Add better comments and on-post documentation for usage.
+* Striped more code from <svg> files for better <symbol> support.
+* Added better comments and on-post documentation for usage.
 
 = 0.0.3 =
 
-* Add more details to readme.
+* Added more details to readme.
 
 = 0.0.2 =
 
-* Fix issue where featured image script executed on save of non-SVG posts.
+* Fixed issue where featured image script executed on save of non-SVG posts.
 
 = 0.0.1 =
 
