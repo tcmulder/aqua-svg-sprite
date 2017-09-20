@@ -22,9 +22,9 @@ Class Aqua_SVG_Sprite {
 	  $filetype = wp_check_filetype( $filename, $mimes );
 
 	  return [
-		  'ext'             => $filetype['ext'],
-		  'type'            => $filetype['type'],
-		  'proper_filename' => $data['proper_filename']
+		  'ext'				=> $filetype['ext'],
+		  'type'			=> $filetype['type'],
+		  'proper_filename'	=> $data['proper_filename']
 	  ];
 
 	}
@@ -49,6 +49,7 @@ Class Aqua_SVG_Sprite {
 	public static function init_hooks() {
 		self::$initiated = true;
 		add_action( 'init', array( 'Aqua_SVG_Sprite', 'create_svg_post_type' ) );
+		add_action( 'admin_enqueue_scripts', array( 'Aqua_SVG_Sprite', 'add_admin_scripts' ) );
 		add_filter( 'wp_check_filetype_and_ext', array( 'Aqua_SVG_Sprite', 'add_svg_mime_type' ), 10, 4 );
 		add_filter( 'upload_mimes', array( 'Aqua_SVG_Sprite', 'cc_mime_types' ) );
 		add_action( 'admin_head', array( 'Aqua_SVG_Sprite', 'fix_svg' ) );
@@ -140,6 +141,14 @@ Class Aqua_SVG_Sprite {
 
 	}
 
+	public static function add_admin_scripts() {
+		if( 'aqua_svg_sprite' === get_post_type() ) {
+			wp_register_script( 'aqua_svg_sprite_admin_scripts', AQUA_SVG_SPRITE_PLUGIN_URI .'assets/js/aqua-svg-sprite-admin.js', 'jquery', '1.0', true );
+			wp_enqueue_script( 'aqua_svg_sprite_admin_scripts' );
+		}
+
+	}
+
 	/**
 	 * Create SVG insert button
 	 */
@@ -224,40 +233,6 @@ Class Aqua_SVG_Sprite {
 		<h3>Usage Instructions</h3>
 		<?php echo self::field_message(); ?>
 
-	<script>
-	jQuery('#aqua-svg-button').click(function() {
-
-		var send_attachment_bkp = wp.media.editor.send.attachment;
-
-		wp.media.editor.send.attachment = function( props, attachment ) {
-			jQuery( '#aqua-svg')
-				.val( attachment.id );
-			jQuery( '#aqua-svg-preview' )
-				.each(function(){
-					var $this = jQuery(this);
-					if ( $this.is( 'img' ) ) {
-						$this.attr( 'src', attachment.url );
-						console.log('no...');
-					} else {
-						var imageHTML = '<img ';
-							imageHTML += 'src="';
-							imageHTML += attachment.url;
-							imageHTML += '" id="aqua-svg-preview"';
-							imageHTML += ' style="max-width:200px;height:auto;"';
-							imageHTML += ' alt="SVG preview image"';
-							imageHTML += ' />';
-						console.log(imageHTML);
-						$this.replaceWith( imageHTML );
-					}
-				} );
-			wp.media.editor.send.attachment = send_attachment_bkp;
-		}
-
-		wp.media.editor.open();
-
-		return false;
-	});
-	</script>
 	<?php
 
 	}
