@@ -213,7 +213,6 @@ Class Aqua_SVG_Sprite {
 			$image = '<img src="' . $image_arr[0] . '" id="aqua-svg-preview" style="max-width:200px;height:auto;" alt="SVG preview image" />';
 		}
 		?>
-
 		<p>
 			<?php echo $image; ?>
 		</p>
@@ -221,6 +220,9 @@ Class Aqua_SVG_Sprite {
 			<input type="hidden" name="aqua-svg" id="aqua-svg" class="meta_image" value="<?php echo $stored_id; ?>" />
 			<input type="button" id="aqua-svg-button" class="button" value="Choose or Upload an Image" />
 		</p>
+		<hr>
+		<h3>Usage Instructions</h3>
+		<?php echo self::field_message(); ?>
 
 	<script>
 	jQuery('#aqua-svg-button').click(function() {
@@ -289,12 +291,9 @@ Class Aqua_SVG_Sprite {
 		// describe requirements
 		$message = '
 			<p>
-				You\'re highly encouraged to run the file through an SVG compressor like
+				<em>Pro Tip:</em> It\'s a great idea to run the file through an SVG compressor like
 				<a href="https://jakearchibald.github.io/svgomg/" target="_blank">SVG OMG</a>
-				before uploading it here. This will make the images load faster,
-				but more importantly it will strip extra code added by image editors that could
-				prevent your website from loading SVG images correctly. In most cases,
-				images should be 1000x1000px in size, with the fill removed from the code.
+				before uploading it here so you can apply manual compression.
 			</p>
 		';
 		// provide API helpers
@@ -309,23 +308,26 @@ Class Aqua_SVG_Sprite {
 			$sprite_slug = $term_obj->slug;
 			// set up the message text
 			$message .='
-			<p><strong>Basic shortcode usage:</strong></p>
-			<code>[aqua-svg slug="' . $slug . '"' . ( 'general' !== $sprite_slug ? ' sprite="' . $sprite_slug . '"' : '' ) . ']</code>
-			<p><strong>More complex shortcode example:</strong></p>
-			<code>[aqua-svg slug="' . $slug . '" sprite="' . $sprite_slug . '" attr="viewbox=0 0 1000 1000,fill=aquamarine"]</code>
-			<p><strong>PHP usage:</strong></p>
-			<code>&lt;?php aqua_svg( \'' . $slug . '\'' . ( 'general' !== $sprite_slug ? ', \'' . $sprite_slug . '\'' : '' ) . ' ); ?&gt;</code>
-			<p><strong>More complex PHP example:</strong></p>
+
+<p><strong>Basic shortcode usage:</strong></p>
+<p><code>[aqua-svg slug="' . $slug . '"' . ( 'general' !== $sprite_slug ? ' sprite="' . $sprite_slug . '"' : '' ) . ']</code></p>
+
+<p><strong>More complex shortcode example:</strong></p>
+<p><code>[aqua-svg slug="' . $slug . '" sprite="' . $sprite_slug . '" attr="viewbox=0 0 1000 1000,fill=aquamarine"]</code></p>
+
+<p><strong>PHP usage:</strong></p>
+<p><code>&lt;?php the_aqua_svg( \'' . $slug . '\'' . ( 'general' !== $sprite_slug ? ', \'' . $sprite_slug . '\'' : '' ) . ' ); ?&gt;</code></p>
+
+<p><strong>More complex PHP example:</strong></p>
 <pre><code>&lt;?php
   /* Get Sprite String and Echo */
   $slug = \''. $slug .'\';
   $sprite = \'' . $sprite_slug . '\';
-  $echo = false;
   $attr = array(
 	\'viewbox\' => \'0 0 1000 1000\',
 	\'fill\' => \'aquamarine\',
   );
-  echo aqua_svg( $slug, $sprite, $echo, $attr );
+  echo get_aqua_svg( $slug, $sprite, $attr );
 ?&gt;</code></pre>
 
 			';
