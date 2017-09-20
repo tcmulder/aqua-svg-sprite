@@ -56,6 +56,8 @@ Class Aqua_SVG_Sprite {
 		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'save_group_meta_box' ) );
 		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'save_group_meta_box' ) );
 		add_action( 'save_post', array( 'Aqua_SVG_Sprite', 'set_default_object_terms' ), 0, 2 );
+		add_action( 'admin_head', array( 'Aqua_SVG_Sprite', 'register_shortcode_button' ) );
+		add_action( 'before_wp_tiny_mce', array( 'Aqua_SVG_Sprite', 'localize_shortcode_button_scripts' ) );
 	}
 
 	/**
@@ -141,11 +143,71 @@ Class Aqua_SVG_Sprite {
 	}
 
 	/**
+	 * Create SVG insert button
+	 */
+	public static function register_shortcode_button() {
+	    if ( get_user_option( 'rich_editing' ) == 'true' ) {
+	        add_filter( 'mce_external_plugins', array( 'Aqua_SVG_Sprite', 'add_shortcode_script' ) );
+	        add_filter( 'mce_buttons', array( 'Aqua_SVG_Sprite', 'register_mce_buttons' ) );
+	    }
+	}
+
+	// add the path to the js file with the custom button function
+	public static function add_shortcode_script( $plugin_array ) {
+	    $plugin_array['aqua_svg_sprite_button'] = AQUA_SVG_SPRITE_PLUGIN_URI .'assets/js/tinymce-button.js';
+	    return $plugin_array;
+	}
+
+	// register and add new button in the editor
+	public static function register_mce_buttons( $buttons ) {
+	    array_push( $buttons, 'aqua_svg_sprite_button' );
+	    return $buttons;
+	}
+
+	// localize scripts for button
+	public static function localize_shortcode_button_scripts( $buttons ) {
+		// get all the sprites and their groups
+		$sprite_info = array();
+		$query = new WP_Query( array( 'post_type' => 'aqua_svg_sprite' ) );
+		if ( $query->have_posts() ) {
+			while ( $query->have_posts() ) {
+				$query->the_post();
+				// get ready for name/slug of post
+				global $post;
+				// get the group
+				$terms = get_the_terms( get_the_id(), 'aqua_svg_sprite_group' );
+				$term = $terms[0];
+				// add them to the array
+				array_push( $sprite_info,
+					array (
+						'svg' => array(
+							'name' => $post->post_title,
+							'slug' => $post->post_name,
+						),
+						'sprite' => array(
+							'name' => $term->name,
+							'slug' => $term->slug,
+						),
+					)
+				);
+			}
+		}
+		// add directly to the page (because wp_localize_script has nothing to tie into)
+		echo '
+			<script type="text/javascript">
+			/* <![CDATA[ */
+			var aquaSVGSpriteShortcode = ' . json_encode( $sprite_info ) . ';
+			/* ]]> */
+			</script>
+		';
+	}
+
+	/**
 	 * Create field for uploading svg files.
 	 */
 	public static function create_acf_feields() {
 
-		if( function_exists('acf_add_local_field_group') ):
+		if ( function_exists('acf_add_local_field_group') ):
 		acf_add_local_field_group(array (
 			'key' => 'group_58d70ae925cf4',
 			'title' => 'SVG Sprite',

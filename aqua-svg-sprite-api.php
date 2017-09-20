@@ -81,32 +81,16 @@ function aqua_svg_sprite_shortcode( $attr ) {
 		// add the property/values into the html array
 		foreach( $html_arr as $key_val ) {
 			$key_val = explode( '=', $key_val );
-			$html_attr[esc_html( $key_val[0] )] = esc_html( $key_val[1] );
+			$key = esc_html( $key_val[0] );
+			$val = esc_html( $key_val[1] );
+			// if there are key/values (fixes trailing commas also)
+			if ( ! empty( $key ) && ! empty( $val ) ) {
+				$html_attr[$key] = $val;
+			}
 		}
 	}
 
 	// sent the <svg> code
 	return aqua_svg( $slug, $sprite, false, $html_attr );
 
-}
-
-// check if wysiwyg is enabled
-function custom_mce_buttons() {
-    if ( get_user_option( 'rich_editing' ) == 'true' ) {
-        add_filter( 'mce_external_plugins', 'custom_tinymce_plugin' );
-        add_filter( 'mce_buttons', 'register_mce_buttons' );
-    }
-}
-add_action('admin_head', 'custom_mce_buttons');
-
-// add the path to the js file with the custom button function
-function custom_tinymce_plugin( $plugin_array ) {
-    $plugin_array['custom_mce_button1'] = AQUA_SVG_SPRITE_PLUGIN_URI .'assets/js/buttons.js';
-    return $plugin_array;
-}
-
-// register and add new button in the editor
-function register_mce_buttons( $buttons ) {
-    array_push( $buttons, 'custom_mce_button1' );
-    return $buttons;
 }
