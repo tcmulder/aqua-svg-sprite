@@ -54,6 +54,7 @@ Class Aqua_SVG_Sprite {
 		add_action( 'admin_head', array( 'Aqua_SVG_Sprite', 'register_shortcode_button' ) );
 		add_action( 'add_meta_boxes', array( 'Aqua_SVG_Sprite', 'aqua_svg_add_meta_boxes' ) );
 		add_action( 'before_wp_tiny_mce', array( 'Aqua_SVG_Sprite', 'localize_shortcode_button_scripts' ) );
+		add_action( 'pre_post_update', array( 'Aqua_SVG_Sprite', 'validate_values' ) );
 		add_action( 'save_post', array( 'Aqua_SVG_Sprite', 'create_svg_sprite' ) );
 		add_action( 'save_post', array( 'Aqua_SVG_Sprite', 'set_default_object_terms' ), 0, 2 );
 		add_action( 'save_post', array( 'Aqua_SVG_Sprite', 'save_aqua_svg_sprite_meta_box' ) );
@@ -263,7 +264,7 @@ Class Aqua_SVG_Sprite {
 		$is_valid_nonce = ( isset( $_POST[ 'aqua_svg_sprite_nonce' ] ) && wp_verify_nonce( $_POST[ 'aqua_svg_sprite_nonce' ], 'aqua_svg_sprite_submit' ) ) ? 'true' : 'false';
 
 		// exit if not
-		if ( $is_autosave || $is_revision || !$is_valid_nonce  ) {
+		if ( $is_autosave || $is_revision || ! $is_valid_nonce  ) {
 			return;
 		}
 
@@ -395,6 +396,28 @@ Class Aqua_SVG_Sprite {
 				}
 			}
 		}
+	}
+
+	/**
+	* Validate before saving posts.
+	*/
+	public static function validate_values( $post_id ) {
+
+		if ( 'aqua_svg_sprite' === get_post_type( $post_id ) ) {
+			// if there's post value (empty if moving to trash)
+			if ( ! empty( $_POST ) ) {
+				// if there is no SVG
+				if ( ! isset( $_POST['aqua-svg'] ) || '' === $_POST['aqua-svg'] ) {
+					wp_die( 'You must add an SVG before saving.', 'Error - Missing SVG', array( 'back_link' => true ) );
+				}
+				$attachment_src_arr = wp_get_attachment_image_src( $_POST['aqua-svg'] );
+				$ext = pathinfo( $attachment_src_arr[0], PATHINFO_EXTENSION );
+				if ( 'svg' !== $ext ) {
+					wp_die( 'You must choose an SVG file (file extension of chosen file was ".' . $ext . '").', 'Error - Not SVG', array( 'back_link' => true ) );
+				}
+			}
+		}
+
 	}
 
 	/**

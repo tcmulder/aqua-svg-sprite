@@ -52,12 +52,9 @@ You can achieve the same thing using the short code. Notice in particular that t
 
 = 2.1.0 =
 
-* TODO:
- - Require image to be selected for post save.
- - Only allow SVG image uploads.
- - Only allow SVG image selections from library.
-* Added tinymce shortcode button.
 * Added get_aqua_svg and the_aqua_svg API functions.
+* Added tinymce shortcode button.
+* Add validation (must have SVG, must _be_ SVG).
 
 = 2.0.0 =
 
