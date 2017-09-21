@@ -53,10 +53,7 @@ You can achieve the same thing using the short code. Notice in particular that t
 = 2.1.0 =
 
 * TODO:
- - Set meta box script external.
  - Require image to be selected for post save.
- - Hide featured image.
- - Refactor meta box code.
  - Only allow SVG image uploads.
  - Only allow SVG image selections from library.
 * Added tinymce shortcode button.

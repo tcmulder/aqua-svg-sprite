@@ -1,0 +1,20 @@
+/*------------------------------------*\
+    ::Aqua SVG Sprite Admin Styles
+\*------------------------------------*/
+
+#aqua-svg-image {
+	background-image: url( "../images/logo-bg.svg" );
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: center 50px;
+}
+#aqua-svg-image code {
+	display: block;
+	background-color: teal;
+	color: aquamarine;
+}
+
+/* hide post thumbnail */
+#postimagediv {
+	display: none;
+}

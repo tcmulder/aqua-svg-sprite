@@ -141,13 +141,22 @@ Class Aqua_SVG_Sprite {
 
 	}
 
+	/**
+	 * Add Admin CSS/JS
+	 */
 	public static function add_admin_scripts() {
+
 		if( 'aqua_svg_sprite' === get_post_type() ) {
-			wp_register_script( 'aqua_svg_sprite_admin_scripts', AQUA_SVG_SPRITE_PLUGIN_URI .'assets/js/aqua-svg-sprite-admin.js', 'jquery', '1.0', true );
+			// load the CSS
+			wp_register_style( 'aqua_svg_sprite_admin_styles', AQUA_SVG_SPRITE_PLUGIN_URI .'assets/css/aqua-svg-sprite-admin.css', false, '1.0.0' );
+			wp_enqueue_style( 'aqua_svg_sprite_admin_styles' );
+			// load the JS
+			wp_register_script( 'aqua_svg_sprite_admin_scripts', AQUA_SVG_SPRITE_PLUGIN_URI .'assets/js/aqua-svg-sprite-admin.js', 'jquery', '1.0.0', true );
 			wp_enqueue_script( 'aqua_svg_sprite_admin_scripts' );
 		}
 
 	}
+
 
 	/**
 	 * Create SVG insert button
@@ -212,48 +221,53 @@ Class Aqua_SVG_Sprite {
 	/**
 	 * Create field for uploading svg files.
 	 */
+	// orchestrate everything
+	public static function aqua_svg_add_meta_boxes() {
+
+		add_meta_box( 'aqua-svg-image', 'Aqua SVG Sprite Image', array( 'Aqua_SVG_Sprite', 'meta_box_backend' ), 'aqua_svg_sprite', 'normal', 'low' );
+
+	}
+
+	// add the back-end fields
 	public static function meta_box_backend( $post ) {
+		// make it secure
 		wp_nonce_field( 'aqua_svg_sprite_submit', 'aqua_svg_sprite_nonce' );
+		// get some meta data
 		$stored_meta = get_post_meta( $post->ID );
 		$stored_id = ( isset ( $stored_meta['aqua-svg'] ) ) ? $stored_meta['aqua-svg'][0] : '';
 		$image_arr = wp_get_attachment_image_src( $stored_id );
+		// set up the preview image (not an img if no src available, e.g. new posts)
 		$image = '<span id="aqua-svg-preview">';
 		if ( $image_arr ) {
 			$image = '<img src="' . $image_arr[0] . '" id="aqua-svg-preview" style="max-width:200px;height:auto;" alt="SVG preview image" />';
 		}
-		?>
-		<p>
-			<?php echo $image; ?>
-		</p>
-		<p>
-			<input type="hidden" name="aqua-svg" id="aqua-svg" class="meta_image" value="<?php echo $stored_id; ?>" />
-			<input type="button" id="aqua-svg-button" class="button" value="Choose or Upload an Image" />
-		</p>
-		<hr>
-		<h3>Usage Instructions</h3>
-		<?php echo self::field_message(); ?>
 
-	<?php
+		$html = '<p>' . $image . '</p>';
+		$html .= '<p>';
+			$html .= '<input type="hidden" name="aqua-svg" id="aqua-svg" class="meta_image" value="' . $stored_id . '" />';
+			$html .= '<input type="button" id="aqua-svg-button" class="button" value="Choose or Upload an Image" />';
+		$html .= '</p>';
+		$html .= '<hr>';
+		$html .= '<h3>Usage Instructions</h3>';
+		$html .= self::field_message();
 
-	}
+		echo $html;
 
-	// add meta boxes to aqua_svg_sprite posts
-	public static function aqua_svg_add_meta_boxes() {
-		add_meta_box( 'aqua-svg-image', 'Aqua SVG Sprite Image', array( 'Aqua_SVG_Sprite', 'meta_box_backend' ), 'aqua_svg_sprite', 'normal', 'low' );
 	}
 
 	// save meta box results
 	public static function save_aqua_svg_sprite_meta_box( $post_id ) {
+		// check to make sure this should be happening
 		$is_autosave = wp_is_post_autosave( $post_id );
 		$is_revision = wp_is_post_revision( $post_id );
 		$is_valid_nonce = ( isset( $_POST[ 'aqua_svg_sprite_nonce' ] ) && wp_verify_nonce( $_POST[ 'aqua_svg_sprite_nonce' ], 'aqua_svg_sprite_submit' ) ) ? 'true' : 'false';
 
-		// Exits script depending on save status
+		// exit if not
 		if ( $is_autosave || $is_revision || !$is_valid_nonce  ) {
 			return;
 		}
 
-		// Checks for input and sanitizes/saves if needed
+		// save the new attachment id as the thumb for this post
 		if( isset( $_POST['aqua-svg'] ) ) {
 			update_post_meta( $post_id, 'aqua-svg', $_POST['aqua-svg'] );
 		}
@@ -295,14 +309,14 @@ Class Aqua_SVG_Sprite {
 
 <p><strong>More complex PHP example:</strong></p>
 <pre><code>&lt;?php
-  /* Get Sprite String and Echo */
-  $slug = \''. $slug .'\';
-  $sprite = \'' . $sprite_slug . '\';
-  $attr = array(
-	\'viewbox\' => \'0 0 1000 1000\',
-	\'fill\' => \'aquamarine\',
-  );
-  echo get_aqua_svg( $slug, $sprite, $attr );
+	/* Get Sprite String and Echo */
+	$slug = \''. $slug .'\';
+	$sprite = \'' . $sprite_slug . '\';
+	$attr = array(
+		\'viewbox\' => \'0 0 1000 1000\',
+		\'fill\' => \'aquamarine\',
+	);
+	echo get_aqua_svg( $slug, $sprite, $attr );
 ?&gt;</code></pre>
 
 			';
