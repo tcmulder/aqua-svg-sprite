@@ -14,24 +14,24 @@ Creates an SVG sprite.
 
 This plugin allows you to create an SVG sprite by uploading individual files to the WordPress media library.
 
-A call to `aqua_svg( 'some-slug' )` will output  SVG <use> code for the sprite with an ID (post slug) of "some-slug". If you tag an image with a different sprite group than the default "general" one, you access those by calling `aqua_svg( 'some-slug', 'some-group' )`.
+A call to `the_aqua_svg( 'some-slug' )` will output  SVG <use> code for the sprite with an ID (post slug) of "some-slug". If you tag an image with a different sprite group than the default "general" one, you access those by calling `the_aqua_svg( 'some-slug', 'some-group' )`.
 
 You can also use shortcodes, like `[aqua-svg slug="some-slug"]` or `[aqua-svg slug="some-slug" sprite="some-group"]` to achieve the same as the above paragraph.
 
 Full PHP usage options are as follows:
 ```
-aqua_svg( string $slug, string $sprite = 'general', boolean echo = true, array $attr( 'attribute' => 'value' ) )
+the_aqua_svg( string $slug, string $sprite = 'general', array $attr( 'attribute' => 'value' ) )
 ```
 
 For example:
 ```
 <?php
     // echo the "some-slug" svg from the default "general" group
-    aqua_svg( 'some-slug' );
+    the_aqua_svg( 'some-slug' );
     
-    // store (not echo) the "some-slug" from the "some-sprite" group, adding
-    // viewbox and fill properties.
-    $svg_string = aqua_svg( 'some-slug', 'some-sprite', false, array( 'viewbox' => '0 0 1000 1000', 'fill' => 'aquamarine' ) );
+    // store (not echo) the "some-slug" SVG from the "some-sprite" group,
+    // adding viewbox and fill properties.
+    $svg_string = get_aqua_svg( 'some-slug', 'some-sprite', array( 'viewbox' => '0 0 1000 1000', 'fill' => 'aquamarine' ) );
     
     // echo it manually
     echo $svg_string;
@@ -54,7 +54,7 @@ You can achieve the same thing using the short code. Notice in particular that t
 
 * Added get_aqua_svg and the_aqua_svg API functions.
 * Added tinymce shortcode button.
-* Add validation (must have SVG, must _be_ SVG).
+* Add validation (must have added SVG, must _be_ SVG).
 * Add internationalization functions.
 
 = 2.0.0 =
