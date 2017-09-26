@@ -75,21 +75,21 @@ Class Aqua_SVG_Sprite {
 			'aqua_svg_sprite',
 			array(
 				'labels' => array(
-					'name'                       => 'Sprite Groups', 'Taxonomy General Name', 'aqua_svg_sprite',
-					'singular_name'              => 'Sprite Group', 'Taxonomy Singular Name', 'aqua_svg_sprite',
-					'menu_name'                  => 'Sprite Groups', 'aqua_svg_sprite',
-					'all_items'                  => 'All Items', 'aqua_svg_sprite',
-					'parent_item'                => 'Parent Item', 'aqua_svg_sprite',
-					'parent_item_colon'          => 'Parent Item:', 'aqua_svg_sprite',
-					'new_item_name'              => 'New Item Name', 'aqua_svg_sprite',
-					'add_new_item'               => 'Add New Item', 'aqua_svg_sprite',
-					'edit_item'                  => 'Edit Item', 'aqua_svg_sprite',
-					'update_item'                => 'Update Item', 'aqua_svg_sprite',
-					'separate_items_with_commas' => 'Separate items with commas', 'aqua_svg_sprite',
-					'search_items'               => 'Search Items', 'aqua_svg_sprite',
-					'add_or_remove_items'        => 'Add or remove items', 'aqua_svg_sprite',
-					'choose_from_most_used'      => 'Choose from the most used items', 'aqua_svg_sprite',
-					'not_found'                  => 'Not Found', 'aqua_svg_sprite',
+					'name'                       => 'Sprite Groups', 'Taxonomy General Name', 'aqua-svg-sprite',
+					'singular_name'              => 'Sprite Group', 'Taxonomy Singular Name', 'aqua-svg-sprite',
+					'menu_name'                  => 'Sprite Groups', 'aqua-svg-sprite',
+					'all_items'                  => 'All Items', 'aqua-svg-sprite',
+					'parent_item'                => 'Parent Item', 'aqua-svg-sprite',
+					'parent_item_colon'          => 'Parent Item:', 'aqua-svg-sprite',
+					'new_item_name'              => 'New Item Name', 'aqua-svg-sprite',
+					'add_new_item'               => 'Add New Item', 'aqua-svg-sprite',
+					'edit_item'                  => 'Edit Item', 'aqua-svg-sprite',
+					'update_item'                => 'Update Item', 'aqua-svg-sprite',
+					'separate_items_with_commas' => 'Separate items with commas', 'aqua-svg-sprite',
+					'search_items'               => 'Search Items', 'aqua-svg-sprite',
+					'add_or_remove_items'        => 'Add or remove items', 'aqua-svg-sprite',
+					'choose_from_most_used'      => 'Choose from the most used items', 'aqua-svg-sprite',
+					'not_found'                  => 'Not Found', 'aqua-svg-sprite',
 				),
 				'meta_box_cb'       => array ( 'Aqua_SVG_Sprite', 'group_meta_box' ),
 				'capabilities' => array(
@@ -105,21 +105,21 @@ Class Aqua_SVG_Sprite {
 		register_post_type( 'aqua_svg_sprite',
 			array(
 				'labels'       => array(
-					'name'                       => 'SVG Sprite', 'Taxonomy General Name', 'aqua_svg_sprite',
-					'singular_name'              => 'SVG Sprite', 'Taxonomy Singular Name', 'aqua_svg_sprite',
-					'menu_name'                  => 'SVG Sprite', 'aqua_svg_sprite',
-					'all_items'                  => 'All Items', 'aqua_svg_sprite',
-					'parent_item'                => 'Parent Item', 'aqua_svg_sprite',
-					'parent_item_colon'          => 'Parent Item:', 'aqua_svg_sprite',
-					'new_item_name'              => 'New Item Name', 'aqua_svg_sprite',
-					'add_new_item'               => 'Add New Item', 'aqua_svg_sprite',
-					'edit_item'                  => 'Edit Item', 'aqua_svg_sprite',
-					'update_item'                => 'Update Item', 'aqua_svg_sprite',
-					'separate_items_with_commas' => 'Separate items with commas', 'aqua_svg_sprite',
-					'search_items'               => 'Search Items', 'aqua_svg_sprite',
-					'add_or_remove_items'        => 'Add or remove items', 'aqua_svg_sprite',
-					'choose_from_most_used'      => 'Choose from the most used items', 'aqua_svg_sprite',
-					'not_found'                  => 'Not Found', 'aqua_svg_sprite',
+					'name'                       => 'SVG Sprite', 'Taxonomy General Name', 'aqua-svg-sprite',
+					'singular_name'              => 'SVG Sprite', 'Taxonomy Singular Name', 'aqua-svg-sprite',
+					'menu_name'                  => 'SVG Sprite', 'aqua-svg-sprite',
+					'all_items'                  => 'All Items', 'aqua-svg-sprite',
+					'parent_item'                => 'Parent Item', 'aqua-svg-sprite',
+					'parent_item_colon'          => 'Parent Item:', 'aqua-svg-sprite',
+					'new_item_name'              => 'New Item Name', 'aqua-svg-sprite',
+					'add_new_item'               => 'Add New Item', 'aqua-svg-sprite',
+					'edit_item'                  => 'Edit Item', 'aqua-svg-sprite',
+					'update_item'                => 'Update Item', 'aqua-svg-sprite',
+					'separate_items_with_commas' => 'Separate items with commas', 'aqua-svg-sprite',
+					'search_items'               => 'Search Items', 'aqua-svg-sprite',
+					'add_or_remove_items'        => 'Add or remove items', 'aqua-svg-sprite',
+					'choose_from_most_used'      => 'Choose from the most used items', 'aqua-svg-sprite',
+					'not_found'                  => 'Not Found', 'aqua-svg-sprite',
 				),
 				'menu_icon' => 'dashicons-images-alt',
 				'public' => false,
@@ -225,7 +225,7 @@ Class Aqua_SVG_Sprite {
 	// orchestrate everything
 	public static function aqua_svg_add_meta_boxes() {
 
-		add_meta_box( 'aqua-svg-image', 'Aqua SVG Sprite Image', array( 'Aqua_SVG_Sprite', 'meta_box_backend' ), 'aqua_svg_sprite', 'normal', 'low' );
+		add_meta_box( 'aqua-svg-image', __( 'Aqua SVG Sprite Image', 'aqua-svg-sprite' ), array( 'Aqua_SVG_Sprite', 'meta_box_backend' ), 'aqua_svg_sprite', 'normal', 'low' );
 
 	}
 
@@ -240,16 +240,16 @@ Class Aqua_SVG_Sprite {
 		// set up the preview image (not an img if no src available, e.g. new posts)
 		$image = '<span id="aqua-svg-preview">';
 		if ( $image_arr ) {
-			$image = '<img src="' . $image_arr[0] . '" id="aqua-svg-preview" style="max-width:200px;height:auto;" alt="SVG preview image" />';
+			$image = '<img src="' . $image_arr[0] . '" id="aqua-svg-preview" style="max-width:200px;height:auto;" alt="' . esc_html__( 'SVG preview image', 'aqua-svg-sprite' ) . '" />';
 		}
 
 		$html = '<p>' . $image . '</p>';
 		$html .= '<p>';
 			$html .= '<input type="hidden" name="aqua-svg" id="aqua-svg" class="meta_image" value="' . $stored_id . '" />';
-			$html .= '<input type="button" id="aqua-svg-button" class="button" value="Choose or Upload an Image" />';
+			$html .= '<input type="button" id="aqua-svg-button" class="button" value="' . __( 'Choose or Upload an Image', 'aqua-svg-sprite' ) . '" />';
 		$html .= '</p>';
 		$html .= '<hr>';
-		$html .= '<h3>Usage Instructions</h3>';
+		$html .= '<h3>' . __( 'Usage Instructions', 'aqua-svg-sprite' ) . '</h3>';
 		$html .= self::field_message();
 
 		echo $html;
@@ -279,13 +279,13 @@ Class Aqua_SVG_Sprite {
 	 */
 	public static function field_message() {
 		// describe requirements
-		$message = '
+		$message = sprintf( __( '
 			<p>
 				<em>Pro Tip:</em> It\'s a great idea to run the file through an SVG compressor like
-				<a href="https://jakearchibald.github.io/svgomg/" target="_blank">SVG OMG</a>
+				%1$s
 				before uploading it here so you can apply manual compression.
 			</p>
-		';
+		', 'aqua-svg-sprite' ), '<a href="https://jakearchibald.github.io/svgomg/" target="_blank">SVG OMG</a>' );
 		// provide API helpers
 		if ( get_post_field( 'post_name', $_GET['post'] ) ) {
 			// get this post's slug
@@ -299,16 +299,16 @@ Class Aqua_SVG_Sprite {
 			// set up the message text
 			$message .='
 
-<p><strong>Basic shortcode usage:</strong></p>
+<p><strong>' . __( 'Basic shortcode usage', 'aqua-svg-sprite' ) . ':</strong></p>
 <p><code>[aqua-svg slug="' . $slug . '"' . ( 'general' !== $sprite_slug ? ' sprite="' . $sprite_slug . '"' : '' ) . ']</code></p>
 
-<p><strong>More complex shortcode example:</strong></p>
+<p><strong>' . __( 'More complex shortcode example', 'aqua-svg-sprite' ) . ':</strong></p>
 <p><code>[aqua-svg slug="' . $slug . '" sprite="' . $sprite_slug . '" attr="viewbox=0 0 1000 1000,fill=aquamarine"]</code></p>
 
-<p><strong>PHP usage:</strong></p>
+<p><strong>' . __( 'PHP usage', 'aqua-svg-sprite' ) . ':</strong></p>
 <p><code>&lt;?php the_aqua_svg( \'' . $slug . '\'' . ( 'general' !== $sprite_slug ? ', \'' . $sprite_slug . '\'' : '' ) . ' ); ?&gt;</code></p>
 
-<p><strong>More complex PHP example:</strong></p>
+<p><strong>' . __( 'More complex PHP example', 'aqua-svg-sprite' ) . ':</strong></p>
 <pre><code>&lt;?php
 	/* Get Sprite String and Echo */
 	$slug = \''. $slug .'\';
@@ -322,7 +322,7 @@ Class Aqua_SVG_Sprite {
 
 			';
 		} else {
-			$message .= '<p><em>(helpful API docs will appear here once you save the post)</em></p>';
+			$message .= '<p><em>(' . __( 'helpful API docs will appear here once you save the post', 'aqua-svg-sprite' ) . ')</em></p>';
 		}
 		return $message;
 
