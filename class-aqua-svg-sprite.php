@@ -13,7 +13,7 @@ Class Aqua_SVG_Sprite {
 		}
 	}
 
-	 /**
+	/**
 	 * Allow for upload of svg files.
 	 * workaround needed, see: https://codepen.io/chriscoyier/post/wordpress-4-7-1-svg-upload
 	 */

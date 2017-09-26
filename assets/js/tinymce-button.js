@@ -1,6 +1,6 @@
-/*------------------------------------*\
-	::SVG Button Shortcode tinymce Plugin
-\*------------------------------------*/
+/**
+ * SVG Button Shortcode tinymce Plugin
+ */
 (function () {
 	tinymce.PluginManager.add('aqua_svg_sprite_button', function(editor, url) {
 		var svgNamesGroups = function() {

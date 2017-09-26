@@ -1,6 +1,6 @@
-/*------------------------------------*\
-	::Aqua SVG Sprite Meta Box
-\*------------------------------------*/
+/**
+ * Aqua SVG Sprite Meta Box
+ */
 jQuery( function($) {
 	// on click of the upload button
 	$('#aqua-svg-button').on('click', function() {

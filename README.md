@@ -55,6 +55,7 @@ You can achieve the same thing using the short code. Notice in particular that t
 * Added get_aqua_svg and the_aqua_svg API functions.
 * Added tinymce shortcode button.
 * Add validation (must have SVG, must _be_ SVG).
+* Add internationalization functions.
 
 = 2.0.0 =
 
