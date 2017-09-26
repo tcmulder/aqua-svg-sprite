@@ -12,10 +12,11 @@
 				var svgSlug 	= aquaSVGSpriteShortcode[i]['svg']['slug']
 				var spriteSlug 	= aquaSVGSpriteShortcode[i]['sprite']['slug']
 				spriteArray.push( {
-					text: 	svgName + ( 'General' !== spriteName ? ' (' + spriteName + ' sprite)' : '' ),
+					text: 	spriteName + '>' + svgName,
 					value: 	svgSlug + ',' + spriteSlug,
 				} );
 			}
+			spriteArray.sort(function(a,b) {return (a.text > b.text) ? 1 : ((b.text > a.text) ? -1 : 0);} );
 			return spriteArray;
 		}
 		editor.addButton('aqua_svg_sprite_button', {
