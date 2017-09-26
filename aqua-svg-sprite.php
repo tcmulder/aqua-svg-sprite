@@ -2,13 +2,12 @@
 /*
 Plugin Name: Aqua SVG Sprite
 Description: Create SVG sprites within WordPress.
-Version:     1.0.0
+Version:     2.1.0
 Author:      Tomas Mulder
 Author URI:  http://www.thinkaquamarine.com
 License:     GPL2
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: aqua-svg-sprite
-Domain Path: /languages
 */
 
 // Exit if accessed directly.
