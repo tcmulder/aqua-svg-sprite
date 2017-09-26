@@ -14,9 +14,15 @@ Creates an SVG sprite.
 
 This plugin allows you to create an SVG sprite by uploading individual files to the WordPress media library.
 
-A call to `the_aqua_svg( 'some-slug' )` will output  SVG <use> code for the sprite with an ID (post slug) of "some-slug". If you tag an image with a different sprite group than the default "general" one, you access those by calling `the_aqua_svg( 'some-slug', 'some-group' )`.
+= Shortcode Usage =
 
-You can also use shortcodes, like `[aqua-svg slug="some-slug"]` or `[aqua-svg slug="some-slug" sprite="some-group"]` to achieve the same as the above paragraph.
+Aqua SVG Sprite will add a new `[SVG]` button to your editor (anywhere a WYSIWYG with TinyMCE appears), which will guide you through adding a shortcode to your content.
+
+For example, you could display the "Some Slug" image from the default "General" sprite group like `[aqua-svg slug="some-slug"]`. If "Some Slug" were part of the "Some Group" sprite instead, you would use `[aqua-svg slug="some-slug" sprite="some-group"]`. You can also add a pseudo-array of HTML properties for more control like `[aqua-svg slug="some-slug" sprite="some-sprite" attr="viewbox=0 0 1000 1000,fill=aquamarine"]`.
+
+= PHP Usage =
+
+A call to `the_aqua_svg( 'some-slug' )` will output  SVG <use> code for the sprite with an ID (post slug) of "some-slug". If you tag an image with a different sprite group than the default "general" one, you access those by calling `the_aqua_svg( 'some-slug', 'some-group' )`.
 
 Full PHP usage options are as follows:
 ```
@@ -38,10 +44,12 @@ For example:
 ?>
 ```
 
-You can achieve the same thing using the short code. Notice in particular that there is no echo option, and there's a pseudo-array format for properties:
-```
-[aqua-svg slug="some-slug" sprite="some-sprite" attr="viewbox=0 0 1000 1000,fill=aquamarine"]
-```
+
+= Why Use SVG Sprites? =
+
+SVG, or Scalable Vector Graphics, allow you to add resolution-independent images to your websites. These images are generally much sharper and smaller in file size compared to other formats like JPEG.
+
+However, each SVG image needs to be requested separately, which slows down your website. Adding SVG images to a sprite allows the browser to download multiple images with just one request, then show the individual pieces of the sprite separately. Depending on the number of images you're displaying, this can significantly speed up your website.
 
 == Installation ==
 
