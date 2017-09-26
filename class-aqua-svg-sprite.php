@@ -226,6 +226,7 @@ Class Aqua_SVG_Sprite {
 	public static function aqua_svg_add_meta_boxes() {
 
 		add_meta_box( 'aqua-svg-image', __( 'Aqua SVG Sprite Image', 'aqua-svg-sprite' ), array( 'Aqua_SVG_Sprite', 'meta_box_backend' ), 'aqua_svg_sprite', 'normal', 'low' );
+		add_meta_box( 'aqua-svg-image-instructions', __( 'Aqua SVG Sprite Usage Instructions', 'aqua-svg-sprite' ), array( 'Aqua_SVG_Sprite', 'meta_box_instructions' ), 'aqua_svg_sprite', 'normal', 'low' );
 
 	}
 
@@ -248,36 +249,14 @@ Class Aqua_SVG_Sprite {
 			$html .= '<input type="hidden" name="aqua-svg" id="aqua-svg" class="meta_image" value="' . $stored_id . '" />';
 			$html .= '<input type="button" id="aqua-svg-button" class="button" value="' . __( 'Choose or Upload an Image', 'aqua-svg-sprite' ) . '" />';
 		$html .= '</p>';
-		$html .= '<hr>';
-		$html .= '<h3>' . __( 'Usage Instructions', 'aqua-svg-sprite' ) . '</h3>';
-		$html .= self::field_message();
 
 		echo $html;
 
 	}
 
-	// save meta box results
-	public static function save_aqua_svg_sprite_meta_box( $post_id ) {
-		// check to make sure this should be happening
-		$is_autosave = wp_is_post_autosave( $post_id );
-		$is_revision = wp_is_post_revision( $post_id );
-		$is_valid_nonce = ( isset( $_POST[ 'aqua_svg_sprite_nonce' ] ) && wp_verify_nonce( $_POST[ 'aqua_svg_sprite_nonce' ], 'aqua_svg_sprite_submit' ) ) ? 'true' : 'false';
+	// add instructions
+	public static function meta_box_instructions( $post ) {
 
-		// exit if not
-		if ( $is_autosave || $is_revision || ! $is_valid_nonce  ) {
-			return;
-		}
-
-		// save the new attachment id as the thumb for this post
-		if( isset( $_POST['aqua-svg'] ) ) {
-			update_post_meta( $post_id, 'aqua-svg', $_POST['aqua-svg'] );
-		}
-	}
-
-	/**
-	 * Create message to users for the field.
-	 */
-	public static function field_message() {
 		// describe requirements
 		$message = sprintf( __( '
 			<p>
@@ -309,7 +288,7 @@ Class Aqua_SVG_Sprite {
 <p><code>&lt;?php the_aqua_svg( \'' . $slug . '\'' . ( 'general' !== $sprite_slug ? ', \'' . $sprite_slug . '\'' : '' ) . ' ); ?&gt;</code></p>
 
 <p><strong>' . __( 'More complex PHP example', 'aqua-svg-sprite' ) . ':</strong></p>
-<pre><code>&lt;?php
+<pre><code class="aqua-svg-sprite-multiline">&lt;?php
 	/* Get Sprite String and Echo */
 	$slug = \''. $slug .'\';
 	$sprite = \'' . $sprite_slug . '\';
@@ -324,8 +303,28 @@ Class Aqua_SVG_Sprite {
 		} else {
 			$message .= '<p><em>(' . __( 'helpful API docs will appear here once you save the post', 'aqua-svg-sprite' ) . ')</em></p>';
 		}
-		return $message;
 
+		// output it
+		echo $message;
+
+	}
+
+	// save meta box results
+	public static function save_aqua_svg_sprite_meta_box( $post_id ) {
+		// check to make sure this should be happening
+		$is_autosave = wp_is_post_autosave( $post_id );
+		$is_revision = wp_is_post_revision( $post_id );
+		$is_valid_nonce = ( isset( $_POST[ 'aqua_svg_sprite_nonce' ] ) && wp_verify_nonce( $_POST[ 'aqua_svg_sprite_nonce' ], 'aqua_svg_sprite_submit' ) ) ? 'true' : 'false';
+
+		// exit if not
+		if ( $is_autosave || $is_revision || ! $is_valid_nonce  ) {
+			return;
+		}
+
+		// save the new attachment id as the thumb for this post
+		if( isset( $_POST['aqua-svg'] ) ) {
+			update_post_meta( $post_id, 'aqua-svg', $_POST['aqua-svg'] );
+		}
 	}
 
 	/**
