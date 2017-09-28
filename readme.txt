@@ -4,7 +4,7 @@ Contributors: tcmulder
 Tags: svg sprite, svg, sprite, acf
 Requires at least: 4.7.1
 Tested up to: 4.8.1
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,12 +58,18 @@ However, each SVG image needs to be requested separately, which slows down your 
 
 == Changelog ==
 
+= 2.1.1 =
+
+* Added more flexibility to URI paths for sprite.
+* Added better validation and sanitization of superglobals.
+* Fixed legacy function echo bug.
+
 = 2.1.0 =
 
 * Added get_aqua_svg and the_aqua_svg API functions.
 * Added tinymce shortcode button.
-* Add validation (must have added SVG, must _be_ SVG).
-* Add internationalization functions.
+* Added validation (must have added SVG, must _be_ SVG).
+* Added internationalization functions.
 
 = 2.0.0 =
 
