@@ -26,8 +26,10 @@ function get_aqua_svg ( $slug, $sprite = 'general', $attr = array() ) {
 			$attr_html .= ' ' . $key . '="' . $value . '"';
 		}
 	}
+	// get the uploads directory info
+	$upload_arr = wp_upload_dir();
 	// get the url for the sprite
-	$aqua_svg_sprite_file = WP_CONTENT_URL . '/uploads/aqua-svg-sprite/aqua-svg-' . $sprite . '-sprite.svg';
+	$aqua_svg_sprite_file = $upload_arr['baseurl'] . '/aqua-svg-sprite/aqua-svg-' . $sprite . '-sprite.svg';
 	// create the full svg sprite html
 	$svg_code = '<svg' . $attr_html . '><use xlink:href="' . $aqua_svg_sprite_file . '#' . $slug . '"' . '></use></svg>';
 	// return svg's html code
@@ -85,7 +87,7 @@ function aqua_svg ( $slug, $sprite = 'general', $echo = true, $attr = array() ) 
 
 	// echo it or return it based on $echo value
 	if ( ! $echo ) {
-		get_aqua_svg( $slug, $sprite, $attr );
+		return get_aqua_svg( $slug, $sprite, $attr );
 	} else {
 		the_aqua_svg( $slug, $sprite, $attr );
 	}
