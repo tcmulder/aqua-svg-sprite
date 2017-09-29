@@ -51,6 +51,10 @@ SVG, or Scalable Vector Graphics, allow you to add resolution-independent images
 
 However, each SVG image needs to be requested separately, which slows down your website. Adding SVG images to a sprite allows the browser to download multiple images with just one request, then show the individual pieces of the sprite separately. Depending on the number of images you're displaying, this can significantly speed up your website.
 
+= More Information =
+
+You can also [learn more about using Aqua SVG Sprite](http://www.thinkaquamarine.com/development/aqua-svg-sprite-plugin/), with advanced options and useful tips.
+
 == Installation ==
 
 1. Upload "aqua-svg-sprite" to the "/wp-content/plugins/" directory.
