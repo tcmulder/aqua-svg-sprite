@@ -1,14 +1,14 @@
 === Aqua SVG Sprite ===
 
-Contributors: tcmulder
-Tags: svg sprite, svg, sprite, acf
+Contributors: thinkaquamarine 
+Tags: svg sprite, svg, sprite
 Requires at least: 4.7.1
 Tested up to: 4.8.1
 Stable tag: 2.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Creates an SVG sprite.
+Creates SVG sprites.
 
 == Description ==
 
