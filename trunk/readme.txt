@@ -31,17 +31,15 @@ the_aqua_svg( string $slug, string $sprite = 'general', array $attr( 'attribute'
 
 For example:
 ```
-<?php
-    // echo the "some-slug" svg from the default "general" group
-    the_aqua_svg( 'some-slug' );
-    
-    // store (not echo) the "some-slug" SVG from the "some-sprite" group,
-    // adding viewbox and fill properties.
-    $svg_string = get_aqua_svg( 'some-slug', 'some-sprite', array( 'viewbox' => '0 0 1000 1000', 'fill' => 'aquamarine' ) );
-    
-    // echo it manually
-    echo $svg_string;
-?>
+// echo the "some-slug" svg from the default "general" group
+the_aqua_svg( 'some-slug' );
+
+// store (not echo) the "some-slug" SVG from the "some-sprite" group,
+// adding viewbox and fill properties.
+$svg_string = get_aqua_svg( 'some-slug', 'some-sprite', array( 'viewbox' => '0 0 1000 1000', 'fill' => 'aquamarine' ) );
+
+// echo it manually
+echo $svg_string;
 ```
 
 
