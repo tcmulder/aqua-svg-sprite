@@ -55,11 +55,11 @@ Class Aqua_SVG_Sprite {
 		add_action( 'add_meta_boxes', array( 'Aqua_SVG_Sprite', 'aqua_svg_add_meta_boxes' ) );
 		add_action( 'before_wp_tiny_mce', array( 'Aqua_SVG_Sprite', 'localize_shortcode_button_scripts' ) );
 		add_action( 'pre_post_update', array( 'Aqua_SVG_Sprite', 'validate_values' ) );
-		add_action( 'save_post', array( 'Aqua_SVG_Sprite', 'create_svg_sprite' ) );
-		add_action( 'save_post', array( 'Aqua_SVG_Sprite', 'set_default_object_terms' ), 0, 2 );
-		add_action( 'save_post', array( 'Aqua_SVG_Sprite', 'save_aqua_svg_sprite_meta_box' ) );
+		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'create_svg_sprite' ) );
+		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'set_default_object_terms' ), 0, 2 );
+		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'save_aqua_svg_sprite_meta_box' ) );
 		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'save_group_meta_box' ) );
-		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'save_group_meta_box' ) );
+		add_action( 'wp_trash_post', array( 'Aqua_SVG_Sprite', 'create_svg_sprite' ) );
 		add_filter( 'upload_mimes', array( 'Aqua_SVG_Sprite', 'cc_mime_types' ) );
 		add_filter( 'wp_check_filetype_and_ext', array( 'Aqua_SVG_Sprite', 'add_svg_mime_type' ), 10, 4 );
 	}
@@ -266,7 +266,7 @@ Class Aqua_SVG_Sprite {
 			</p>
 		', 'aqua-svg-sprite' ), '<a href="https://jakearchibald.github.io/svgomg/" target="_blank">SVG OMG</a>' );
 		// get valid post id
-		$post_id = (int) $_GET['post'];
+		$post_id = ( int ) $_GET['post'];
 		// provide API helpers
 		if ( get_post_field( 'post_name', $post_id ) ) {
 			// get this post's slug
@@ -324,8 +324,8 @@ Class Aqua_SVG_Sprite {
 		}
 
 		// save the new attachment id as the thumb for this post
-		$att_id = (int) $_POST['aqua-svg'];
-		if( isset( $att_id ) ) {
+		$att_id = ( int ) $_POST['aqua-svg'];
+		if( isset( $att_id ) && 0 < $att_id ) {
 			update_post_meta( $post_id, 'aqua-svg', $att_id );
 		}
 	}
@@ -369,12 +369,18 @@ Class Aqua_SVG_Sprite {
 		if ( ! isset( $_POST['aqua_sprite_group'] ) ) {
 			return;
 		}
+		// validate nonce
+		$is_valid_nonce = ( isset( $_POST[ 'aqua_svg_sprite_nonce' ] ) && wp_verify_nonce( $_POST[ 'aqua_svg_sprite_nonce' ], 'aqua_svg_sprite_submit' ) ) ? 'true' : 'false';
+		if ( ! $is_valid_nonce ) {
+			return;
+		}
 		// get the value input
 		$group = sanitize_text_field( $_POST['aqua_sprite_group'] );
-		// if there is a value then update the term
+		// if there is a value
 		if ( ! empty( $group ) ) {
 			$term = get_term_by( 'name', $group, 'aqua_svg_sprite_group' );
 			if ( ! empty( $term ) && ! is_wp_error( $term ) ) {
+				// update the term
 				wp_set_object_terms( $post_id, $term->term_id, 'aqua_svg_sprite_group', false );
 			}
 		}
@@ -409,7 +415,7 @@ Class Aqua_SVG_Sprite {
 			// if there's post value (empty if moving to trash)
 			if ( ! empty( $_POST ) ) {
 				// get the attachment id
-				$att_id = (int) $_POST['aqua-svg'];
+				$att_id = ( int ) $_POST['aqua-svg'];
 				// if there is no SVG attached
 				if ( ! $att_id ) {
 					wp_die( 'You must add an SVG before saving.'.$att_id, 'Error - Missing SVG', array( 'back_link' => true ) );
@@ -483,8 +489,12 @@ Class Aqua_SVG_Sprite {
 							'id' => array(),
 						),
 					);
-					// get the id via meta or through the post data if is current post
-					$svg_id = ( get_the_id() !== $post_id ? get_post_thumbnail_id( get_the_id() ) : (int) $_POST['aqua-svg'] );
+					// store the svg's id
+					$svg_id = 0;
+					// if loop has reached this current post then use the value being posted
+					$svg_id = ( get_the_id() === $post_id ? ( int ) $_POST['aqua-svg'] : 0 );
+					// if on a different post or if the value is still 0 (e.g. untrash_post hook) then query db
+					$svg_id = ( 0 === $svg_id ? get_post_meta( get_the_id(), 'aqua-svg', true ) : $svg_id );
 					// establish the slug (used as id for sprite)
 					$slug = strtolower( trim( preg_replace( '/[\s-]+/', '-', preg_replace( '/[^A-Za-z0-9-]+/', '-', preg_replace( '/[&]/', 'and', preg_replace( '/[\']/', '', iconv('UTF-8', 'ASCII//TRANSLIT', get_the_title() ) ) ) ) ), '-' ) );
 					// create svg code and strip out unneeded elements
@@ -509,9 +519,11 @@ Class Aqua_SVG_Sprite {
 			$svg_sprite .= $svg_symbols;
 			$svg_sprite .= '</svg>';
 			// create the svg file (rebuilds each time)
-			file_put_contents( $aqua_svg_sprite_dir . '/aqua-svg-' . $term . '-sprite.svg', $svg_sprite );
+			$file = $aqua_svg_sprite_dir . '/aqua-svg-' . $term . '-sprite.svg';
+			file_put_contents( $file, $svg_sprite );
 			// update the featured image to the uploaded image
-			update_post_meta( $post_id, '_thumbnail_id', (int) $_POST['aqua-svg'] );
+			update_post_meta( $post_id, '_thumbnail_id', ( int ) $_POST['aqua-svg'] );
+
 		}
 
 	}
