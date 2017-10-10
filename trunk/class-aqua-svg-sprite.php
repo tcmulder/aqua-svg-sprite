@@ -55,11 +55,11 @@ Class Aqua_SVG_Sprite {
 		add_action( 'add_meta_boxes', array( 'Aqua_SVG_Sprite', 'aqua_svg_add_meta_boxes' ) );
 		add_action( 'before_wp_tiny_mce', array( 'Aqua_SVG_Sprite', 'localize_shortcode_button_scripts' ) );
 		add_action( 'pre_post_update', array( 'Aqua_SVG_Sprite', 'validate_values' ) );
-		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'create_svg_sprite' ) );
 		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'set_default_object_terms' ), 0, 2 );
-		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'save_aqua_svg_sprite_meta_box' ) );
-		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'save_group_meta_box' ) );
-		add_action( 'wp_trash_post', array( 'Aqua_SVG_Sprite', 'create_svg_sprite' ) );
+		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'save_group_meta_box' ), 1 );
+		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'save_aqua_svg_sprite_meta_box' ), 2 );
+		add_action( 'save_post_aqua_svg_sprite', array( 'Aqua_SVG_Sprite', 'request_svg_sprite_creation' ), 3 );
+		add_action( 'wp_trash_post', array( 'Aqua_SVG_Sprite', 'request_svg_sprite_creation' ) );
 		add_filter( 'upload_mimes', array( 'Aqua_SVG_Sprite', 'cc_mime_types' ) );
 		add_filter( 'wp_check_filetype_and_ext', array( 'Aqua_SVG_Sprite', 'add_svg_mime_type' ), 10, 4 );
 	}
@@ -143,7 +143,7 @@ Class Aqua_SVG_Sprite {
 	}
 
 	/**
-	 * Add Admin CSS/JS
+	 * Add Admin CSS/JS.
 	 */
 	public static function add_admin_scripts() {
 
@@ -160,7 +160,7 @@ Class Aqua_SVG_Sprite {
 
 
 	/**
-	 * Create SVG insert button
+	 * Create SVG insert button.
 	 */
 	public static function register_shortcode_button() {
 		if ( get_user_option( 'rich_editing' ) == 'true' ) {
@@ -355,12 +355,13 @@ Class Aqua_SVG_Sprite {
 	}
 
 	/**
-	 * Save the sprite group meta box results.
+	 * Save the sprite group meta box values.
 	 *
 	 * @link http://sudarmuthu.com/blog/creating-single-select-wordpress-taxonomies/
 	 * @param int $post_id The ID of the post that's being saved.
 	 */
 	function save_group_meta_box( $post_id ) {
+
 		// handle autosaves
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return;
@@ -380,10 +381,23 @@ Class Aqua_SVG_Sprite {
 		if ( ! empty( $group ) ) {
 			$term = get_term_by( 'name', $group, 'aqua_svg_sprite_group' );
 			if ( ! empty( $term ) && ! is_wp_error( $term ) ) {
+
+				// get the new term slug
+				$new_term = $term->slug;
+				// get the current term id (general by default)
+				$old_term_arr = get_the_terms( $post_id, 'aqua_svg_sprite_group' );
+				$old_term_obj = $old_term_arr[0];
+				$old_term = $old_term_obj->slug;
 				// update the term
 				wp_set_object_terms( $post_id, $term->term_id, 'aqua_svg_sprite_group', false );
+				// if the term has now changed
+				if ( $new_term !== $old_term ) {
+				    // create code for the old sprite to remove this svg from it
+				    self::create_svg_sprite( 0, $old_term );
+				}
 			}
 		}
+
 	}
 
 	/**
@@ -392,6 +406,7 @@ Class Aqua_SVG_Sprite {
 	* @link https://gist.github.com/mayeenulislam/f208b4fd408fd4742c06
 	*/
 	function set_default_object_terms( $post_id, $post ) {
+
 		// only for the aqua sprites
 		if ( 'publish' === $post->post_status && 'aqua_svg_sprite' === $post->post_type ) {
 			// set default to "general" nothing is selected
@@ -404,6 +419,7 @@ Class Aqua_SVG_Sprite {
 				}
 			}
 		}
+
 	}
 
 	/**
@@ -431,99 +447,143 @@ Class Aqua_SVG_Sprite {
 	}
 
 	/**
-	* Rebuild svg sprite on save of svg post type posts.
+	* Set up request for SVG sprite creation on hooks (given only post ID).
 	*/
-	public static function create_svg_sprite( $post_id ) {
+	public static function request_svg_sprite_creation( $post_id ) {
 
+		// called on saves: make sure this is of the right custom post type before executing
 		if ( 'aqua_svg_sprite' === get_post_type( $post_id ) ) {
-			// get the directory where the svg sprite goes (within uploads)
-			$wp_upload_dir = wp_upload_dir();
-			$aqua_svg_sprite_dir = $wp_upload_dir['basedir'] . '/aqua-svg-sprite';
-			// create the directory if it doesn't already exist
-			if ( ! file_exists( $aqua_svg_sprite_dir ) ) {
-				mkdir( $aqua_svg_sprite_dir, 0755, true );
-			}
-			// get the post term (there will only be one)
-			$term = 'general';
+			// get the post term (there will only be one) or default to general
+			$group = 'general';
 			$terms_arr = wp_get_post_terms( $post_id, 'aqua_svg_sprite_group' );
 			if ( $terms_arr ) {
 				$term_obj = $terms_arr[ 0 ];
-				$term = $term_obj->slug;
+				$group = $term_obj->slug;
 			}
+			// create code for this sprite
+			self::create_svg_sprite( $post_id, $group );
+		}
 
-			// start the svg internals (symbols)
-			$svg_symbols = '';
-			// loop through all svgs in this group
-			$args = array(
-				'post_type'         => 'aqua_svg_sprite',
-				'posts_per_page'    => -1,
-				'tax_query' => array(
-					array(
-						'taxonomy' => 'aqua_svg_sprite_group',
-						'field'    => 'slug',
-						'terms'    => $term,
-					),
+	}
+
+	/**
+	* Create svg code.
+	*/
+	public static function create_svg_sprite( $post_id, $group ) {
+
+		// store the svg sprite code
+		$svg_sprite = '';
+		// loop through all svgs in this group
+		$args = array(
+			'post_type'         => 'aqua_svg_sprite',
+			'posts_per_page'    => -1,
+			'tax_query' => array(
+				array(
+					'taxonomy' => 'aqua_svg_sprite_group',
+					'field'    => 'slug',
+					'terms'    => $group,
 				),
-			);
-			$query = new WP_Query( $args );
-			if ( $query->have_posts() ) {
-				while( $query->have_posts() ) { $query->the_post();
-					// allow just svg-related info (used for wp_kses)
-					$allowed = array(
-						'svg' => array(
-							'width' => array(),
-							'height' => array(),
-							'viewbox' => array(),
-							'version' => array(),
-							'xmlns' => array(),
-							'xmlns:xlink' => array(),
-						),
-						'g' => array(
-							'stroke' => array(),
-							'stroke-width' => array(),
-							'fill' => array(),
-							'fill-rule' => array(),
-						),
-						'path' => array(
-							'd' => array(),
-							'id' => array(),
-						),
-					);
-					// store the svg's id
-					$svg_id = 0;
-					// if loop has reached this current post then use the value being posted
-					$svg_id = ( get_the_id() === $post_id ? ( int ) $_POST['aqua-svg'] : 0 );
-					// if on a different post or if the value is still 0 (e.g. untrash_post hook) then query db
-					$svg_id = ( 0 === $svg_id ? get_post_meta( get_the_id(), 'aqua-svg', true ) : $svg_id );
-					// establish the slug (used as id for sprite)
-					$slug = strtolower( trim( preg_replace( '/[\s-]+/', '-', preg_replace( '/[^A-Za-z0-9-]+/', '-', preg_replace( '/[&]/', 'and', preg_replace( '/[\']/', '', iconv('UTF-8', 'ASCII//TRANSLIT', get_the_title() ) ) ) ) ), '-' ) );
-					// create svg code and strip out unneeded elements
-					$svg = file_get_contents( get_attached_file( wp_kses( $svg_id, $allowed ) ) );
-					// get rid of classes and ids
-					$svg = preg_replace( '#\s(id|class)="[^"]+"#', '', $svg );
-					// get rid of <?xml ...
-					$svg = preg_replace( '/\s*<\?xml.*?>/i', '', $svg );
-					// get rid of comments
-					$svg = preg_replace( '/\s*<\!--.*?-->/i', '', $svg );
-					// change svg to symbol
-					$svg = preg_replace( '/<svg/i', '<symbol id="'.$slug.'"', $svg );
-					$svg = preg_replace( '/<\/svg>/i', '</symbol>', $svg );
-					// // get rid of xml namespaces (should be on <svg> instead of <symbol>)
-					$svg = preg_replace( '/\s*xmlns.*?".*?"/i', '', $svg );
-					// add this svg to the sprite
-					$svg_symbols .= $svg;
-				}
+			),
+		);
+		$query = new WP_Query( $args );
+		if ( $query->have_posts() ) {
+			// store the svg internals (symbols)
+			$svg_symbols = '';
+			while( $query->have_posts() ) { $query->the_post();
+				// allow just svg-related info (used for wp_kses)
+				$allowed = array(
+					'svg' => array(
+						'width' => array(),
+						'height' => array(),
+						'viewbox' => array(),
+						'version' => array(),
+						'xmlns' => array(),
+						'xmlns:xlink' => array(),
+					),
+					'g' => array(
+						'stroke' => array(),
+						'stroke-width' => array(),
+						'fill' => array(),
+						'fill-rule' => array(),
+					),
+					'path' => array(
+						'd' => array(),
+						'id' => array(),
+					),
+				);
+				// store the svg's id
+				$attachment_id = 0;
+				// if loop has reached this current post then use the value being posted
+				$attachment_id = ( get_the_id() === $post_id ? ( int ) $_POST['aqua-svg'] : 0 );
+				// if on a different post or if the value is still 0 (e.g. untrash_post hook) then query db
+				$attachment_id = ( 0 === $attachment_id ? get_post_meta( get_the_id(), 'aqua-svg', true ) : $attachment_id );
+				// establish the slug (used as id for sprite)
+				$slug = strtolower( trim( preg_replace( '/[\s-]+/', '-', preg_replace( '/[^A-Za-z0-9-]+/', '-', preg_replace( '/[&]/', 'and', preg_replace( '/[\']/', '', iconv('UTF-8', 'ASCII//TRANSLIT', get_the_title() ) ) ) ) ), '-' ) );
+				// create svg code and strip out unneeded elements
+				$svg = file_get_contents( get_attached_file( wp_kses( $attachment_id, $allowed ) ) );
+				// get rid of classes and ids
+				$svg = preg_replace( '#\s(id|class)="[^"]+"#', '', $svg );
+				// get rid of <?xml ...
+				$svg = preg_replace( '/\s*<\?xml.*?>/i', '', $svg );
+				// get rid of comments
+				$svg = preg_replace( '/\s*<\!--.*?-->/i', '', $svg );
+				// change svg to symbol
+				$svg = preg_replace( '/<svg/i', '<symbol id="'.$slug.'"', $svg );
+				$svg = preg_replace( '/<\/svg>/i', '</symbol>', $svg );
+				// // get rid of xml namespaces (should be on <svg> instead of <symbol>)
+				$svg = preg_replace( '/\s*xmlns.*?".*?"/i', '', $svg );
+				// add this svg to the sprite
+				$svg_symbols .= $svg;
 			}
-			// wrap svg internals
-			$svg_sprite = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">';
+			// create the svg code with symbols inside
+			$svg_sprite  = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">';
 			$svg_sprite .= $svg_symbols;
 			$svg_sprite .= '</svg>';
-			// create the svg file (rebuilds each time)
-			$file = $aqua_svg_sprite_dir . '/aqua-svg-' . $term . '-sprite.svg';
-			file_put_contents( $file, $svg_sprite );
+			// write svg code to the sprite file
+			self::write_svg_sprite( $svg_sprite, $group );
 			// update the featured image to the uploaded image
 			update_post_meta( $post_id, '_thumbnail_id', ( int ) $_POST['aqua-svg'] );
+		// if there are no images left in this sprite
+		} else {
+			// get rid of the empty sprite file
+			self::delete_svg_sprite( $group );
+		}
 
+	}
+
+	/**
+	* Write svg code into the sprite file.
+	*/
+	public static function write_svg_sprite( $svg, $group ) {
+
+		// get the upload directory for sprites
+		$wp_upload_dir = wp_upload_dir();
+		$aqua_svg_sprite_dir = $wp_upload_dir['basedir'] . '/aqua-svg-sprite';
+		// create the directory if it doesn't already exist
+		if ( ! file_exists( $aqua_svg_sprite_dir ) ) {
+			mkdir( $aqua_svg_sprite_dir, 0755, true );
+		}
+		// establish sprite file name
+		$file = $aqua_svg_sprite_dir . '/aqua-svg-' . $group . '-sprite.svg';
+		// write code to the file
+		file_put_contents( $file, $svg );
+
+	}
+
+	/**
+	* Delete sprite file (e.g. if it no longer contains any svg symbols)
+	*/
+	public static function delete_svg_sprite( $group ) {
+
+		// get the upload directory for sprites
+		$wp_upload_dir = wp_upload_dir();
+		$aqua_svg_sprite_dir = $wp_upload_dir['basedir'] . '/aqua-svg-sprite';
+		// establish sprite file name
+		$file = $aqua_svg_sprite_dir . '/aqua-svg-' . $group . '-sprite.svg';
+		// if this file in fact exists
+		if ( file_exists( $file ) ) {
+			// get rid of it
+			wp_delete_file( $file );
 		}
 
 	}
