@@ -4,7 +4,7 @@ Contributors: thinkaquamarine
 Tags: svg sprite, svg, sprite
 Requires at least: 4.7.1
 Tested up to: 4.8.1
-Stable tag: 2.1.2
+Stable tag: 2.1.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -14,44 +14,40 @@ Creates SVG sprites.
 
 This plugin allows you to create an SVG sprite by uploading individual files to the WordPress media library.
 
-= Shortcode Usage =
-
-Aqua SVG Sprite will add a new `[SVG]` button to your editor (anywhere a WYSIWYG with TinyMCE appears), which will guide you through adding a shortcode to your content.
-
-For example, you could display the "Some Slug" image from the default "General" sprite group like `[aqua-svg slug="some-slug"]`. If "Some Slug" were part of the "Some Group" sprite instead, you would use `[aqua-svg slug="some-slug" sprite="some-group"]`. You can also add a pseudo-array of HTML properties for more control like `[aqua-svg slug="some-slug" sprite="some-sprite" attr="viewbox=0 0 1000 1000,fill=aquamarine"]`.
-
-= PHP Usage =
-
-A call to `the_aqua_svg( 'some-slug' )` will output  SVG <use> code for the sprite with an ID (post slug) of "some-slug". If you tag an image with a different sprite group than the default "general" one, you access those by calling `the_aqua_svg( 'some-slug', 'some-group' )`.
-
-Full PHP usage options are as follows:
-```
-the_aqua_svg( string $slug, string $sprite = 'general', array $attr( 'attribute' => 'value' ) )
-```
-
-For example:
-```
-// echo the "some-slug" svg from the default "general" group
-the_aqua_svg( 'some-slug' );
-
-// store (not echo) the "some-slug" SVG from the "some-sprite" group,
-// adding viewbox and fill properties.
-$svg_string = get_aqua_svg( 'some-slug', 'some-sprite', array( 'viewbox' => '0 0 1000 1000', 'fill' => 'aquamarine' ) );
-
-// echo it manually
-echo $svg_string;
-```
-
-
 = Why Use SVG Sprites? =
 
 SVG, or Scalable Vector Graphics, allow you to add resolution-independent images to your websites. These images are generally much sharper and smaller in file size compared to other formats like JPEG.
 
 However, each SVG image needs to be requested separately, which slows down your website. Adding SVG images to a sprite allows the browser to download multiple images with just one request, then show the individual pieces of the sprite separately. Depending on the number of images you're displaying, this can significantly speed up your website.
 
-= More Information =
+= Creating a Sprite =
 
-You can also [learn more about using Aqua SVG Sprite](http://www.thinkaquamarine.com/development/aqua-svg-sprite-plugin/), with advanced options and useful tips.
+Aqua SVG Sprite adds a new SVG Sprite menu to the WordPress sidebar, which functions a lot like the default Posts or Pages menus; you can add, edit, and delete individual SVG images under All Items.
+
+When you add or edit an item, You’re able to choose a few things:
+
+1. The Title makes it easy to find an individual SVG and is also used for selecting an SVG by the shortcode generator button.
+2. The Slug is used as the ID for the symbol in the sprite, which essentially allows WordPress to extract one SVG image from the sprite and display it on the page.
+3. The Aqua SVG Sprite Image is where you add a single SVG image that gets added to the sprite.
+4. There are some basic instructions on usage, pre-populated with the ID and group (explained in the next section) for the individual SVG you’re viewing.
+5. In the sidebar, you can select a Sprite Group as explained in the next section.
+6. Last of course, Publish adds the SVG to the sprite.
+
+= Creating Additional Sprite Groups =
+
+If you’d like to use more than one sprite (the built in General sprite), you can add additional groups by going to the sidebar and clicking SVG Sprite > Sprite Groups. These work similar to WordPress tags, except you can only add each individual SVG image to one sprite group. Since they’re compiled into separate sprite groups, marking the same SVG for multiple groups would duplicate code, somewhat defeating the purpose of a sprite.
+
+After you add a new Sprite Group, it appears as a selection in the right sidebar’s Sprite Group selector when creating or editing individual SVG images.
+
+= Using the Shortcodes =
+
+Aqua SVG Sprite will add a new `[SVG]` button to your editor (anywhere a WYSIWYG with TinyMCE appears), which will guide you through adding a shortcode to your content.
+
+For example, you could display the "Some Slug" image from the default "General" sprite group like `[aqua-svg slug="some-slug"]`. If "Some Slug" were part of the "Some Group" sprite instead, you would use `[aqua-svg slug="some-slug" sprite="some-group"]`. You can also add a pseudo-array of HTML properties for more control like `[aqua-svg slug="some-slug" sprite="some-sprite" attr="viewbox=0 0 1000 1000,fill=aquamarine"]`.
+
+= Using PHP Functions and Advanced Features =
+
+You can [visit the documentation](http://www.thinkaquamarine.com/development/aqua-svg-sprite-plugin/) for more information on using PHP functions, along with code examples and details on more advanced features.
 
 == Installation ==
 
@@ -59,6 +55,13 @@ You can also [learn more about using Aqua SVG Sprite](http://www.thinkaquamarine
 2. Activate the plugin through the "Plugins" menu in WordPress.
 
 == Changelog ==
+
+= 2.1.3 =
+
+* Added sprite recompilation on trash/untrash of svg images.
+* Added sprite recompilation when switching groups (to remove from the previous sprite).
+* Added deletion of sprite groups no longer containing any svg images.
+* Updated readme with all basic instructions but a link to advanced features.
 
 = 2.1.2 =
 
