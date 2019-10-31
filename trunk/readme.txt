@@ -3,8 +3,8 @@
 Contributors: thinkaquamarine 
 Tags: svg sprite, svg, sprite
 Requires at least: 4.7.1
-Tested up to: 4.9.1
-Stable tag: 2.1.4
+Tested up to: 5.2.4
+Stable tag: 2.1.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -55,6 +55,10 @@ You can [visit the documentation](http://www.thinkaquamarine.com/development/aqu
 2. Activate the plugin through the "Plugins" menu in WordPress.
 
 == Changelog ==
+
+= 2.1.5 =
+
+* Update WordPress compatibility.
 
 = 2.1.4 =
 
