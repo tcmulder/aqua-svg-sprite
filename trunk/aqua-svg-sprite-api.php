@@ -26,10 +26,11 @@ function get_aqua_svg ( $slug, $sprite = 'general', $attr = array() ) {
 			$attr_html .= ' ' . $key . '="' . $value . '"';
 		}
 	}
-	// get the uploads directory info
+	// get the uploads directory url (and fix https issue: see https://developer.wordpress.org/reference/functions/wp_upload_dir/#comment-2576)
 	$upload_arr = wp_upload_dir();
+	$url =  ( is_ssl() ? str_replace( 'http://', 'https://', $upload_arr['baseurl'] ) : $upload_arr['baseurl'] );
 	// get the url for the sprite
-	$aqua_svg_sprite_file = $upload_arr['baseurl'] . '/aqua-svg-sprite/aqua-svg-' . $sprite . '-sprite.svg';
+	$aqua_svg_sprite_file = $url . '/aqua-svg-sprite/aqua-svg-' . $sprite . '-sprite.svg';
 	// create the full svg sprite html
 	$svg_code = '<svg' . $attr_html . '><use xlink:href="' . $aqua_svg_sprite_file . '#' . $slug . '"' . '></use></svg>';
 	// return svg's html code
