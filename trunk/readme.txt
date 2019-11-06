@@ -58,7 +58,6 @@ You can [visit the documentation](http://www.thinkaquamarine.com/development/aqu
 
 = 3.0.0 =
 
-* Added Gutenberg block.
 * Fixed issue with HTTPS being used for HTTPS sites.
 
 = 2.1.5 =
