@@ -23,7 +23,12 @@ function get_aqua_svg ( $slug, $sprite = 'general', $attr = array() ) {
 	$attr_html = '';
 	if ( ! empty( $attr ) ) {
 		foreach ( $attr as $key => $value ) {
-			$attr_html .= ' ' . $key . '="' . $value . '"';
+			// don't allow unsafe attributes
+			$unsafe = array( 'onbegin', 'onend', 'onrepeat', 'onabort', 'onerror', 'onresize', 'onscroll', 'onunload', 'oncancel', 'oncanplay', 'oncanplaythrough', 'onchange', 'onclick', 'onclose', 'oncuechange', 'ondblclick', 'ondrag', 'ondragend', 'ondragenter', 'ondragexit', 'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'ondurationchange', 'onemptied', 'onended', 'onerror', 'onfocus', 'oninput', 'oninvalid', 'onkeydown', 'onkeypress', 'onkeyup', 'onload', 'onloadeddata', 'onloadedmetadata', 'onloadstart', 'onmousedown', 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onmousewheel', 'onpause', 'onplay', 'onplaying', 'onprogress', 'onratechange', 'onreset', 'onresize', 'onscroll', 'onseeked', 'onseeking', 'onselect', 'onshow', 'onstalled', 'onsubmit', 'onsuspend', 'ontimeupdate', 'ontoggle', 'onvolumechange', 'onwaiting', 'onactivate', 'onfocusin', 'onfocusout' );
+			if ( ! in_array( $key, $unsafe ) ) {
+				// create the key/value
+				$attr_html .= ' ' . $key . '="' . $value . '"';
+			}
 		}
 	}
 	// get the uploads directory url (and fix https issue: see https://developer.wordpress.org/reference/functions/wp_upload_dir/#comment-2576)
@@ -33,6 +38,7 @@ function get_aqua_svg ( $slug, $sprite = 'general', $attr = array() ) {
 	$aqua_svg_sprite_file = $url . '/aqua-svg-sprite/aqua-svg-' . $sprite . '-sprite.svg';
 	// create the full svg sprite html
 	$svg_code = '<svg' . $attr_html . '><use xlink:href="' . $aqua_svg_sprite_file . '#' . $slug . '"' . '></use></svg>';
+
 	// return svg's html code
 	return $svg_code;
 
