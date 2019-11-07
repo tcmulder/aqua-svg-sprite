@@ -4,7 +4,7 @@ Contributors: thinkaquamarine
 Tags: svg sprite, svg, sprite
 Requires at least: 4.7.1
 Tested up to: 5.2.4
-Stable tag: 3.0.0
+Stable tag: 3.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -56,8 +56,14 @@ You can [visit the documentation](http://www.thinkaquamarine.com/development/aqu
 
 == Changelog ==
 
+= 3.0.1 =
+
+* Added gutenberg block.
+* Prevent unsafe attributes from being added.
+
 = 3.0.0 =
 
+* Set groundwork for gutenberg block (beta).
 * Fixed issue with HTTPS being used for HTTPS sites.
 
 = 2.1.5 =

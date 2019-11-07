@@ -48,6 +48,7 @@ Class Aqua_SVG_Sprite {
 	 */
 	public static function init_hooks() {
 		self::$initiated = true;
+		add_action( 'init', array( 'Aqua_SVG_Sprite', 'register_gutenberg_block' ) );
 		add_action( 'init', array( 'Aqua_SVG_Sprite', 'create_svg_post_type' ) );
 		add_action( 'admin_enqueue_scripts', array( 'Aqua_SVG_Sprite', 'add_admin_scripts' ) );
 		add_action( 'admin_head', array( 'Aqua_SVG_Sprite', 'fix_svg' ) );
@@ -62,6 +63,7 @@ Class Aqua_SVG_Sprite {
 		add_action( 'wp_trash_post', array( 'Aqua_SVG_Sprite', 'request_svg_sprite_creation' ) );
 		add_filter( 'upload_mimes', array( 'Aqua_SVG_Sprite', 'cc_mime_types' ) );
 		add_filter( 'wp_check_filetype_and_ext', array( 'Aqua_SVG_Sprite', 'add_svg_mime_type' ), 10, 4 );
+		add_action( 'rest_api_init', array( 'Aqua_SVG_Sprite', 'add_rest_endpoint' ) );
 	}
 
 	/**
@@ -156,6 +158,78 @@ Class Aqua_SVG_Sprite {
 			wp_enqueue_script( 'aqua_svg_sprite_admin_scripts' );
 		}
 
+	}
+
+	/**
+	 * Add Gutenberg Block
+	 */
+	public static function register_gutenberg_block() {
+		// register the js and define dependencies
+		wp_register_script(
+			'svg-use',
+			AQUA_SVG_SPRITE_PLUGIN_URI .'assets/js/gutenberg-block.js',
+			array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-editor', 'wp-api-fetch', 'wp-i18n' )
+		);
+		// register the block type itself
+		register_block_type( 'aqua-svg-sprite/svg-use', array(
+			'attributes' => array(
+				'slug' => array(
+					'type' => 'string',
+					'default' => '',
+				),
+				'properties' => array(
+					'type' => 'string',
+					'default' => 'width=50,height=50',
+				),
+			),
+			'editor_script' => 'svg-use',
+			'render_callback' => array( 'Aqua_SVG_Sprite', 'gutenberg_dynamic_render_callback' )
+		) );
+
+	}
+
+	public static function gutenberg_dynamic_render_callback( $attr, $content ) {
+
+		// get the svg code and return it
+		if ( $attr[ 'slug' ] ) {
+			// parse attributes
+			$slug_sprite = explode( ',', $attr[ 'slug' ] );
+			// use shortcode as it parses properties and escapes all input
+			return do_shortcode( '[aqua-svg slug="' . $slug_sprite[ 0 ] . '" sprite="' . $slug_sprite[ 1 ] . '" attr="' . $attr[ 'properties' ] . '"]' );
+		}
+
+		// return nothing if there's no slug (possibly true when adding a new onw)
+		return '';
+
+	}
+
+	/**
+	 * Create REST endpoint to collect posts.
+	 */
+	public static function add_rest_endpoint() {
+		register_rest_route( 'aqua-svg-sprite/v1', '/svg/', array(
+			'methods' => 'GET',
+			'callback' => array( 'Aqua_SVG_Sprite', 'get_all_svgs' ),
+		) );
+	}
+	public static function get_all_svgs() {
+		$svg_posts = get_posts( array( 'numberposts' => 500, 'post_type'   => 'aqua_svg_sprite', 'post_status' => 'publish' ) );
+		$svg_arr = array( array( 'slug' => '', 'title' => 'No Sprites Found', 'sprite' => '' ) );
+		if ( $svg_posts ) {
+			$svg_arr = array();
+			foreach( $svg_posts as $svg ) {
+				$all_terms = get_the_terms( $svg->ID, 'aqua_svg_sprite_group' );
+				$term_obj = $all_terms[ 0 ];
+				$term_slug = $term_obj->slug;
+				$svg_arr[] = array(
+					'slug' => $svg->post_name,
+					'title' => $svg->post_title,
+					'sprite' => $term_slug,
+				);
+			}
+		}
+		// return $svg_posts;
+		return $svg_arr;
 	}
 
 
@@ -392,8 +466,8 @@ Class Aqua_SVG_Sprite {
 				wp_set_object_terms( $post_id, $term->term_id, 'aqua_svg_sprite_group', false );
 				// if the term has now changed
 				if ( $new_term !== $old_term ) {
-				    // create code for the old sprite to remove this svg from it
-				    self::create_svg_sprite( 0, $old_term );
+					// create code for the old sprite to remove this svg from it
+					self::create_svg_sprite( 0, $old_term );
 				}
 			}
 		}
