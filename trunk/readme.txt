@@ -12,17 +12,17 @@ Creates SVG sprites.
 
 == Description ==
 
-This plugin allows you to create an SVG sprite by uploading individual files to the WordPress media library.
+This plugin allows you to create SVG sprites out of images from your WordPress media library.
 
 = Why Use SVG Sprites? =
 
 SVG, or Scalable Vector Graphics, allow you to add resolution-independent images to your websites. These images are generally much sharper and smaller in file size compared to other formats like JPEG.
 
-However, each SVG image needs to be requested separately, which slows down your website. Adding SVG images to a sprite allows the browser to download multiple images with just one request, then show the individual pieces of the sprite separately. Depending on the number of images you're displaying, this can significantly speed up your website.
+However, each SVG image needs to be requested separately, which slows down your website. Adding SVG images to a sprite allows the browser to download multiple images with just one request, then show the individual pieces of the sprite separately. By reducing requests, this speeds up your site.
 
 = Creating a Sprite =
 
-Aqua SVG Sprite adds a new SVG Sprite menu to the WordPress sidebar, which functions a lot like the default Posts or Pages menus; you can add, edit, and delete individual SVG images under All Items.
+Aqua SVG Sprite adds a new SVG Sprite menu to the WordPress sidebar, which functions a lot like the default Posts or Pages menus; you can add, edit, and trash individual SVG images under All Items.
 
 When you add or edit an item, You’re able to choose a few things:
 
@@ -35,15 +35,19 @@ When you add or edit an item, You’re able to choose a few things:
 
 = Creating Additional Sprite Groups =
 
-If you’d like to use more than one sprite (the built in General sprite), you can add additional groups by going to the sidebar and clicking SVG Sprite > Sprite Groups. These work similar to WordPress tags, except you can only add each individual SVG image to one sprite group. Since they’re compiled into separate sprite groups, marking the same SVG for multiple groups would duplicate code, somewhat defeating the purpose of a sprite.
+If you’d like to use more than one sprite (the built in General sprite), you can add additional groups by clicking SVG Sprite > Sprite Groups in the WordPress sidebar. These work similar to WordPress tags, except you can only add each individual SVG image to one sprite group. Since they’re compiled into separate sprite groups, marking the same SVG for multiple groups would duplicate code, defeating the purpose of a sprite.
 
-After you add a new Sprite Group, it appears as a selection in the right sidebar’s Sprite Group selector when creating or editing individual SVG images.
+After you add a new Sprite Group, it appears as a selection in the right sidebar’s Sprite Group selector when creating or editing individual SVG sprite images.
+
+= Using the Gutenberg Block =
+
+Aqua SVG Sprite will add a new block called SVG Sprite to your Gutenberg block editor. After you add an SVG Sprite block, you can select the image you would like to use in the block inspector to the right. You can also add an advanced pseudo-array or HTML properties for more control, like `viewbox=0 0 1000 1000,fill=aquamarine` to add a viewbox and fill to the SVG element.
 
 = Using the Shortcodes =
 
-Aqua SVG Sprite will add a new `[SVG]` button to your editor (anywhere a WYSIWYG with TinyMCE appears), which will guide you through adding a shortcode to your content.
+Aqua SVG Sprite will add a new `[SVG]` button to your classic editor (anywhere a WYSIWYG with TinyMCE appears), which will guide you through adding a shortcode to your content.
 
-For example, you could display the "Some Slug" image from the default "General" sprite group like `[aqua-svg slug="some-slug"]`. If "Some Slug" were part of the "Some Group" sprite instead, you would use `[aqua-svg slug="some-slug" sprite="some-group"]`. You can also add a pseudo-array of HTML properties for more control like `[aqua-svg slug="some-slug" sprite="some-sprite" attr="viewbox=0 0 1000 1000,fill=aquamarine"]`.
+For example, you could display the "Some Slug" image from the default "General" sprite group like `[aqua-svg slug="some-slug"]`. If "Some Slug" were part of the "Some Group" sprite instead, you would use `[aqua-svg slug="some-slug" sprite="some-group"]`. You can also add a pseudo-array of HTML properties for more control like `[aqua-svg slug="some-slug" sprite="some-sprite" attr="viewbox=0 0 1000 1000,fill=aquamarine"]` to add a viewbox and fill to the SVG element..
 
 = Using PHP Functions and Advanced Features =
 
@@ -60,6 +64,7 @@ You can [visit the documentation](http://www.thinkaquamarine.com/development/aqu
 
 * Added gutenberg block.
 * Prevent unsafe attributes from being added.
+* Update documentation.
 
 = 3.0.0 =
 
