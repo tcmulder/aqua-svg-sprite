@@ -67,7 +67,7 @@
 					.then( function( data ) {
 						// create an array containing values (comma separated slug/sprite slugs) and title as display
 						var posts = data.map( function ( post ) {
-							return { value: post.slug + ',' + post.sprite, label: post.title }
+							return { value: post.slug + ',' + post.sprite, label: post.title + ' (' + post.sprite + ' sprite)' }
 						} );
 						// sort alphabetically
 						posts.sort( function ( a, b ) { ( a.label > b.label ) ? 1 : ( ( b.label > a.label ) ? -1 : 0 ) } );

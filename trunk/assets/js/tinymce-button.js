@@ -12,7 +12,7 @@
 				var svgSlug 	= aquaSVGSpriteShortcode[i]['svg']['slug']
 				var spriteSlug 	= aquaSVGSpriteShortcode[i]['sprite']['slug']
 				spriteArray.push( {
-					text: 	spriteName + '>' + svgName,
+					text: 	svgName + ' (' + spriteName + ')',
 					value: 	svgSlug + ',' + spriteSlug,
 				} );
 			}
