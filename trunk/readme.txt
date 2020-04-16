@@ -3,8 +3,8 @@
 Contributors: thinkaquamarine 
 Tags: svg sprite, svg, sprite
 Requires at least: 4.7.1
-Tested up to: 5.2.4
-Stable tag: 3.0.1
+Tested up to: 5.4
+Stable tag: 3.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -60,6 +60,11 @@ You can [visit the documentation](http://www.thinkaquamarine.com/development/aqu
 
 == Changelog ==
 
+= 3.0.2 =
+
+* Fixed issue with gutenberg-block.js not being loaded.
+* Tested on WordPress 5.4.
+
 = 3.0.1 =
 
 * Added gutenberg block.
@@ -69,7 +74,7 @@ You can [visit the documentation](http://www.thinkaquamarine.com/development/aqu
 = 3.0.0 =
 
 * Set groundwork for gutenberg block (beta).
-* Fixed issue with HTTPS being used for HTTPS sites.
+* Fixed issue with HTTPS being used for HTTP sites.
 
 = 2.1.5 =
 
