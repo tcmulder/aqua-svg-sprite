@@ -1,10 +1,10 @@
 === Aqua SVG Sprite ===
 
-Contributors: thinkaquamarine
+Contributors: thinkaquamarine 
 Tags: svg sprite, svg, sprite
 Requires at least: 4.7.1
-Tested up to: 5.4.2
-Stable tag: 3.0.3
+Tested up to: 5.4
+Stable tag: 3.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -59,11 +59,6 @@ You can [visit the documentation](http://www.thinkaquamarine.com/development/aqu
 2. Activate the plugin through the "Plugins" menu in WordPress.
 
 == Changelog ==
-
-= 3.0.3 =
-
-* Removed unused activation hook call.
-* Tested on WordPress 5.4.2.
 
 = 3.0.2 =
 
