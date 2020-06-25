@@ -1,0 +1,36 @@
+/**
+* Aqua SVG Sprite Admin Styles
+*/
+
+#aqua-svg-image {
+    max-width: 300px;
+}
+
+#aqua-svg-image img,
+#aqua-svg-image input {
+    display: block;
+    margin: 0 auto;
+}
+
+#aqua-svg-image-instructions {
+	background-image: url( "../images/logo-bg.svg" );
+	background-size: auto 150%;
+	background-repeat: no-repeat;
+	background-position: 125% center;
+}
+
+#aqua-svg-image-instructions code {
+    padding: 5px;
+    background-color: teal;
+    color: aquamarine;
+    border-radius: 2px;
+}
+
+#aqua-svg-image-instructions code.aqua-svg-sprite-multiline {
+	display: block;
+}
+
+/* hide post thumbnail */
+#postimagediv {
+	display: none;
+}
