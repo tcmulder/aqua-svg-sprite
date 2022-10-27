@@ -9,6 +9,7 @@
 	registerBlockType = blocks.registerBlockType,
 	ServerSideRender = components.ServerSideRender,
 	InspectorControls = editor.InspectorControls,
+	PanelBody = components.PanelBody,
 	SelectControl = components.SelectControl,
 	TextControl = components.TextControl,
 	__ = i18n.__;
@@ -91,24 +92,29 @@
 					null,
 					[
 						el(
-							SelectControl,
-							{
-								label: __( 'Select Sprite Image', 'aqua-svg-sprite' ),
-								value: props.attributes.slug,
-								options: list,
-								onChange: onChangeSelectField
-							}
-						),
-						el(
-							TextControl,
-							{
-								label: __( 'Advanced Properties', 'aqua-svg-sprite' ),
-								value: props.attributes.properties,
-								onChange: onChangeTextField,
-								help: __( 'Add SVG properties in the format "width=50,height=50"', 'aqua-svg-sprite' ),
-							}
+							PanelBody,
+							null,
+							[
+								el(
+									SelectControl,
+									{
+										label: __( 'Select Sprite Image', 'aqua-svg-sprite' ),
+										value: props.attributes.slug,
+										options: list,
+										onChange: onChangeSelectField
+									}
+								),
+								el(
+									TextControl,
+									{
+										label: __( 'Advanced Properties', 'aqua-svg-sprite' ),
+										value: props.attributes.properties,
+										onChange: onChangeTextField,
+										help: __( 'Add SVG properties in the format "width=50,height=50"', 'aqua-svg-sprite' ),
+									}
+								)
+							]
 						)
-
 					]
 				),
 				// output the server-side rendered icon
