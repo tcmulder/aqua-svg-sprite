@@ -1,13 +1,13 @@
 /**
  * SVG Button Gutenberg Block
  */
-( function( blocks, element, components, editor, apiFetch, i18n ) {
+( function( blocks, element, components, serverSideRender, editor, apiFetch, i18n ) {
 
 	// "destructure" the variables
 	var el = element.createElement,
 	useState = element.useState,
 	registerBlockType = blocks.registerBlockType,
-	ServerSideRender = components.ServerSideRender,
+	// ServerSideRender = components.ServerSideRender,
 	InspectorControls = editor.InspectorControls,
 	PanelBody = components.PanelBody,
 	SelectControl = components.SelectControl,
@@ -85,9 +85,9 @@
 				getList();
 			}
 
-			return (
+			return ([
 				// output the controls (select box) for choosing the svg sprite element to use
-				[ el(
+				el(
 					InspectorControls,
 					null,
 					[
@@ -118,11 +118,11 @@
 					]
 				),
 				// output the server-side rendered icon
-				el(ServerSideRender, {
+				el(serverSideRender, {
 					block: 'aqua-svg-sprite/svg-use',
 					attributes: props.attributes
-				} ) ]
-			);
+				} )
+			]);
 		},
 	} );
 // establish dependencies
@@ -130,6 +130,7 @@
 	window.wp.blocks,
 	window.wp.element,
 	window.wp.components,
+	window.wp.serverSideRender,
 	window.wp.editor,
 	window.wp.apiFetch,
 	window.wp.i18n,
