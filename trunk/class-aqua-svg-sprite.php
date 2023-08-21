@@ -410,7 +410,7 @@ Class Aqua_SVG_Sprite {
 	 * @link http://sudarmuthu.com/blog/creating-single-select-wordpress-taxonomies/
 	 * @param obj post object
 	 */
-	function group_meta_box( $post ) {
+	public static function group_meta_box( $post ) {
 		$terms = get_terms( 'aqua_svg_sprite_group', array( 'hide_empty' => false ) );
 		$post  = get_post();
 		$group = wp_get_object_terms( $post->ID, 'aqua_svg_sprite_group', array( 'orderby' => 'term_id', 'order' => 'ASC' ) );
