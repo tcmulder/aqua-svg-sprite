@@ -3,7 +3,7 @@
 Contributors: thinkaquamarine
 Tags: svg sprite, svg, sprite
 Requires at least: 5.6.0
-Tested up to: 6.4.2
+Tested up to: 6.5
 Stable tag: 3.0.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -60,6 +60,10 @@ You can [visit the documentation](http://www.thinkaquamarine.com/development/aqu
 
 == Changelog ==
 
+= 3.0.10 =
+
+* Tested on WordPress 6.5.
+* Fixed PHP 8 error on post save.
 
 = 3.0.9 =
 

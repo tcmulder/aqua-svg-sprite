@@ -434,7 +434,7 @@ Class Aqua_SVG_Sprite {
 	 * @link http://sudarmuthu.com/blog/creating-single-select-wordpress-taxonomies/
 	 * @param int $post_id The ID of the post that's being saved.
 	 */
-	function save_group_meta_box( $post_id ) {
+	public static function save_group_meta_box( $post_id ) {
 
 		// handle autosaves
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
@@ -479,7 +479,7 @@ Class Aqua_SVG_Sprite {
 	* If no story (taxonomy) is set, the comic post will be sorted as “draft” and won’t return an offset error.
 	* @link https://gist.github.com/mayeenulislam/f208b4fd408fd4742c06
 	*/
-	function set_default_object_terms( $post_id, $post ) {
+	public static function set_default_object_terms( $post_id, $post ) {
 
 		// only for the aqua sprites
 		if ( 'publish' === $post->post_status && 'aqua_svg_sprite' === $post->post_type ) {
