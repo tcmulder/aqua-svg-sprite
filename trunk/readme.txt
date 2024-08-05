@@ -62,7 +62,7 @@ You can [visit the documentation](http://www.thinkaquamarine.com/development/aqu
 
 = 3.0.12 =
 
-* Test and update stable tag.
+* Test with WordPress 6.6.1.
 
 = 3.0.11 =
 
