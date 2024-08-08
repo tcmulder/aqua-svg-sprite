@@ -127,6 +127,7 @@ Class Aqua_SVG_Sprite {
 				'public' => false,
 				'show_ui' => true,
 				'menu_position' => 100, // bottom-ish
+				'show_in_rest' => true,
 				'supports' => array(
 					'custom-fields',
 					'title',
@@ -340,17 +341,17 @@ Class Aqua_SVG_Sprite {
 			</p>
 		', 'aqua-svg-sprite' ), '<a href="https://jakearchibald.github.io/svgomg/" target="_blank">SVG OMG</a>' );
 		// get valid post id
-		$post_id = ( int ) $_GET['post'];
+		$post_id = isset( $_GET['post'] ) ? ( int ) $_GET['post'] : 0;
 		// provide API helpers
 		if ( get_post_field( 'post_name', $post_id ) ) {
 			// get this post's slug
 			$slug = get_post_field( 'post_name', $post_id );
 			// get the sprite this is part of (can only be one)
 			$term_arr = wp_get_post_terms( $post_id, 'aqua_svg_sprite_group' );
-			$first_term_obj = $term_arr[0];
-			$term_id = $first_term_obj->term_taxonomy_id;
+			$first_term_obj = $term_arr[0] ?? "NO_SPRITE_GROUP_CHOSEN";
+			$term_id = $first_term_obj->term_taxonomy_id ?? "NO_SPRITE_GROUP_CHOSEN";
 			$term_obj = get_term_by( 'id', $term_id, 'aqua_svg_sprite_group' );
-			$sprite_slug = $term_obj->slug;
+			$sprite_slug = $term_obj->slug ?? "NO_SPRITE_GROUP_CHOSEN";
 			// set up the message text
 			$message .='
 
@@ -398,7 +399,7 @@ Class Aqua_SVG_Sprite {
 		}
 
 		// save the new attachment id as the thumb for this post
-		$att_id = ( int ) $_POST['aqua-svg'];
+		$att_id = isset( $_POST['aqua-svg'] ) ? ( int ) $_POST['aqua-svg'] : 0;
 		if( isset( $att_id ) && 0 < $att_id ) {
 			update_post_meta( $post_id, 'aqua-svg', $att_id );
 		}
@@ -588,6 +589,7 @@ Class Aqua_SVG_Sprite {
 				// store the svg's id
 				$attachment_id = 0;
 				// if loop has reached this current post then use the value being posted
+				$svg_id = isset( $_POST['aqua-svg'] ) ? ( int ) $_POST['aqua-svg'] : 0;
 				$attachment_id = ( get_the_id() === $post_id ? ( int ) $_POST['aqua-svg'] : 0 );
 				// if on a different post or if the value is still 0 (e.g. untrash_post hook) then query db
 				$attachment_id = ( 0 === $attachment_id ? get_post_meta( get_the_id(), 'aqua-svg', true ) : $attachment_id );
@@ -616,7 +618,8 @@ Class Aqua_SVG_Sprite {
 			// write svg code to the sprite file
 			self::write_svg_sprite( $svg_sprite, $group );
 			// update the featured image to the uploaded image
-			update_post_meta( $post_id, '_thumbnail_id', ( int ) $_POST['aqua-svg'] );
+			$svg_id = isset( $_POST['aqua-svg'] ) ? ( int ) $_POST['aqua-svg'] : 0;
+			update_post_meta( $post_id, '_thumbnail_id', $svg_id );
 		// if there are no images left in this sprite
 		} else {
 			// get rid of the empty sprite file
