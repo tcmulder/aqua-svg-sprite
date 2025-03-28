@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Import the SVG Sanitizer class from the enshrined\svgSanitize library
+ * Used for sanitizing and cleaning SVG files to prevent potential security risks
+ */
+use enshrined\svgSanitize\Sanitizer;
+
 Class Aqua_SVG_Sprite {
 
 	private static $initiated = false;
@@ -542,91 +548,194 @@ Class Aqua_SVG_Sprite {
 	}
 
 	/**
-	* Create svg code.
-	*/
-	public static function create_svg_sprite( $post_id, $group ) {
+    * Create svg code.
+    * Sanitizes SVG content using enshrined/svg-sanitize before adding to the sprite.
+    */
+    public static function create_svg_sprite( $post_id, $group ) {
+      // Check if the Sanitizer class exists before proceeding
+      if (!class_exists('\enshrined\svgSanitize\Sanitizer')) {
+         error_log('Aqua SVG Sprite Error: SVG Sanitizer library not found. Sprite generation skipped.');
+         return; 
+      }
+      // Instantiate the sanitizer
+      $sanitizer = new Sanitizer();
 
-		// store the svg sprite code
-		$svg_sprite = '';
-		// loop through all svgs in this group
-		$args = array(
-			'post_type'         => 'aqua_svg_sprite',
-			'posts_per_page'    => -1,
-			'tax_query' => array(
-				array(
-					'taxonomy' => 'aqua_svg_sprite_group',
-					'field'    => 'slug',
-					'terms'    => $group,
-				),
-			),
-		);
-		$query = new WP_Query( $args );
-		if ( $query->have_posts() ) {
-			// store the svg internals (symbols)
-			$svg_symbols = '';
-			while( $query->have_posts() ) { $query->the_post();
-				// allow just svg-related info (used for wp_kses)
-				$allowed = array(
-					'svg' => array(
-						'width' => array(),
-						'height' => array(),
-						'viewbox' => array(),
-						'version' => array(),
-						'xmlns' => array(),
-						'xmlns:xlink' => array(),
-					),
-					'g' => array(
-						'stroke' => array(),
-						'stroke-width' => array(),
-						'fill' => array(),
-						'fill-rule' => array(),
-					),
-					'path' => array(
-						'd' => array(),
-						'id' => array(),
-					),
-				);
-				// store the svg's id
-				$attachment_id = 0;
-				// if loop has reached this current post then use the value being posted
-				$svg_id = isset( $_POST['aqua-svg'] ) ? ( int ) $_POST['aqua-svg'] : 0;
-				$attachment_id = ( get_the_id() === $post_id ? ( int ) $_POST['aqua-svg'] : 0 );
-				// if on a different post or if the value is still 0 (e.g. untrash_post hook) then query db
-				$attachment_id = ( 0 === $attachment_id ? get_post_meta( get_the_id(), 'aqua-svg', true ) : $attachment_id );
-				// get the slug (used as id for sprite)
-				$slug = basename( get_permalink() );
-				// create svg code and strip out unneeded elements
-				$svg = file_get_contents( get_attached_file( wp_kses( $attachment_id, $allowed ) ) );
-				// get rid of classes and ids
-				$svg = preg_replace( '#\s(id|class)="[^"]+"#', '', $svg );
-				// get rid of <?xml ...
-				$svg = preg_replace( '/\s*<\?xml.*?>/i', '', $svg );
-				// get rid of comments
-				$svg = preg_replace( '/\s*<\!--.*?-->/i', '', $svg );
-				// change svg to symbol
-				$svg = preg_replace( '/<svg/i', '<symbol id="'.$slug.'"', $svg );
-				$svg = preg_replace( '/<\/svg>/i', '</symbol>', $svg );
-				// // get rid of xml namespaces (should be on <svg> instead of <symbol>)
-				$svg = preg_replace( '/\s*xmlns.*?".*?"/i', '', $svg );
-				// add this svg to the sprite
-				$svg_symbols .= $svg;
-			}
-			// create the svg code with symbols inside
-			$svg_sprite  = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">';
-			$svg_sprite .= $svg_symbols;
-			$svg_sprite .= '</svg>';
-			// write svg code to the sprite file
-			self::write_svg_sprite( $svg_sprite, $group );
-			// update the featured image to the uploaded image
-			$svg_id = isset( $_POST['aqua-svg'] ) ? ( int ) $_POST['aqua-svg'] : 0;
-			update_post_meta( $post_id, '_thumbnail_id', $svg_id );
-		// if there are no images left in this sprite
-		} else {
-			// get rid of the empty sprite file
-			self::delete_svg_sprite( $group );
-		}
+      // Store the svg sprite code
+      $svg_sprite = '';
+      // Loop through all svgs in this group
+      $args = array(
+         'post_type'         => 'aqua_svg_sprite',
+         'posts_per_page'    => -1,
+         'post_status'       => 'publish', // Ensure only published SVGs are included
+         'tax_query' => array(
+            array(
+                  'taxonomy' => 'aqua_svg_sprite_group',
+                  'field'    => 'slug',
+                  'terms'    => $group,
+            ),
+         ),
+         // 'orderby'           => 'title', // Optional: order symbols consistently
+         // 'order'             => 'ASC',
+      );
+      $query = new WP_Query( $args );
 
-	}
+      if ( $query->have_posts() ) {
+         // Store the svg internals (symbols)
+         $svg_symbols = '';
+         while( $query->have_posts() ) {
+            $query->the_post();
+
+            // --- Get Attachment ID ---
+            // Determine the attachment ID. Check $_POST first for the currently saved post,
+            // otherwise get the stored meta value. This handles various hooks correctly.
+            $current_loop_post_id = get_the_ID();
+            $attachment_id = 0;
+
+            // If the current loop item is the post being saved/updated AND we have POST data for 'aqua-svg'
+            if ( $current_loop_post_id === $post_id && isset( $_POST['aqua-svg'] ) ) {
+                  // Use the value from the POST request (it might be 0 if removing the image)
+                  // Ensure it's an integer.
+                  $attachment_id = (int) $_POST['aqua-svg'];
+            }
+
+            // If attachment ID is still 0 (not the post being saved, or POST data not set/relevant, e.g., on trash hook for *other* posts), get from meta.
+            // Also fetch from meta if the POST value was 0 (meaning image removed for the *current* post, so we shouldn't include it anyway).
+            if ( $attachment_id <= 0 ) {
+                  $attachment_id = (int) get_post_meta( $current_loop_post_id, 'aqua-svg', true );
+            }
+
+            // If after all checks, we don't have a valid attachment ID for this post in the loop, skip it.
+            if ( $attachment_id <= 0 ) {
+                  continue;
+            }
+
+            // Get the slug (used as id for sprite)
+            $slug = get_post_field( 'post_name', $current_loop_post_id );
+            if ( empty($slug) ) {
+                  // Skip if the post somehow has no slug
+                  continue;
+            }
+
+            // --- Get Raw SVG Content ---
+            $svg_file_path = get_attached_file( $attachment_id );
+            // Check if the path is valid and the file exists
+            if ( !$svg_file_path || !file_exists($svg_file_path) ) {
+                  // Log potentially? error_log("Aqua SVG Sprite: File not found for attachment ID: " . $attachment_id);
+                  continue; // Skip this SVG
+            }
+            // Check if the file is actually an SVG by mime type (basic check)
+            $mime_type = mime_content_type($svg_file_path);
+            if ( strpos($mime_type, 'svg') === false) {
+                  // Log potentially? error_log("Aqua SVG Sprite: File is not SVG for attachment ID: " . $attachment_id . " Mime: " . $mime_type);
+                  continue; // Skip non-SVG files
+            }
+
+            $raw_svg = file_get_contents( $svg_file_path );
+            if ( false === $raw_svg ) {
+                  // Log potentially? error_log("Aqua SVG Sprite: Failed to read file for attachment ID: " . $attachment_id);
+                  continue; // Skip this SVG if file reading failed
+            }
+
+            // --- Sanitize the SVG Content ---
+            $sanitized_svg = $sanitizer->sanitize( $raw_svg );
+
+            // --- Check if Sanitization was Successful ---
+            if ( false === $sanitized_svg || empty( trim( $sanitized_svg ) ) ) {
+                  // Skip this SVG if sanitization failed or resulted in empty content
+                  // Optionally, log an error here for debugging.
+                  // error_log("Aqua SVG Sprite: Failed to sanitize SVG for attachment ID: " . $attachment_id);
+                  continue;
+            }
+
+            // --- Perform Sprite-Specific Modifications on SANITIZED SVG ---
+            $symbol_content = $sanitized_svg;
+
+            // Remove IDs and Classes (optional, original behavior - keep if desired)
+            $symbol_content = preg_replace( '#\s(id|class)="[^"]+"#i', '', $symbol_content );
+
+            // Get rid of <?xml ... declaration
+            $symbol_content = preg_replace( '/^\s*<\?xml.*?\?>/is', '', $symbol_content );
+
+            // Get rid of comments
+            $symbol_content = preg_replace( '/<!--.*?-->/is', '', $symbol_content );
+
+            // Change svg to symbol, preserving original attributes and adding the ID (slug)
+            // Make regex non-greedy and case-insensitive
+				$symbol_content = preg_replace(
+					'/<svg([^>]*)>/i',      // Pattern: Find <svg ...attributes...>
+					'<symbol id="' . esc_attr($slug) . '"$1>', // Replacement: <symbol id="slug" ...attributes...>
+					$symbol_content,
+					1
+			  	);
+				// </svg> -> </symbol>
+            $symbol_content = preg_replace( '/<\/svg>/i', '</symbol>', $symbol_content );
+
+            // Remove xmlns attributes specifically from the <symbol> tag after conversion
+            $symbol_content = preg_replace_callback( '/<symbol[^>]*>/i', function( $matches ) {
+                  return preg_replace('/\sxmlns:[^=]*="[^"]*"|\sxmlns="[^"]*"/i', '', $matches[0]);
+            }, $symbol_content );
+
+            // --- Minify SVG Symbol Content (Removing unnecessary whitespaces, newlines, etc.) ---
+            $minified_content = $symbol_content;
+
+            // 1. Remove line breaks, tabs, and replace multiple spaces with a single space
+            $minified_content = str_replace(array("\r", "\n", "\t"), '', $minified_content);
+				$minified_content = preg_replace('/\s+/', ' ', $minified_content);
+
+				// 2. Remove spaces between SVG tags
+				$minified_content = preg_replace('/>\s+</', '><', $minified_content);
+
+            // 3. Trim leading/trailing whitespace potentially left after replacements
+            $minified_content = trim($minified_content);
+
+            // --- Add this MINIFIED, sanitized, and modified SVG as a symbol to the sprite ---
+            // Add a newline before the symbol for readability if $svg_symbols is not empty
+            if ( !empty( $svg_symbols ) ) {
+                  $svg_symbols .= PHP_EOL; // Add newline for separation
+            }
+            $svg_symbols .= $minified_content; // Trim whitespace around the symbol
+
+         } // end while
+
+         // Restore original post data
+         wp_reset_postdata();
+
+         // Only proceed if we actually have symbols
+         if ( !empty( trim( $svg_symbols ) ) ) {
+            // Create the svg code with symbols inside
+            $svg_sprite  = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="display: none;">'; // Add display:none by default
+            $svg_sprite .= PHP_EOL; // Add newline after opening <svg>
+            $svg_sprite .= $svg_symbols;
+            $svg_sprite .= PHP_EOL; // Add newline before closing </svg>
+            $svg_sprite .= '</svg>';
+
+            // Write svg code to the sprite file
+            self::write_svg_sprite( $svg_sprite, $group );
+
+            // Update the featured image for the *triggering* post (if $post_id is valid)
+            // This meta is primarily for display in the admin, ensure it uses the correct ID
+            if ( $post_id > 0 && isset( $_POST['aqua-svg'] ) ) {
+                  $thumb_id = (int) $_POST['aqua-svg'];
+                  // Only set if a valid image was selected, otherwise remove thumbnail
+                  if ( $thumb_id > 0 ) {
+                     update_post_meta( $post_id, '_thumbnail_id', $thumb_id );
+                  } else {
+                     delete_post_meta( $post_id, '_thumbnail_id' );
+                  }
+            }
+         } else {
+               // If loop finished but $svg_symbols is empty (e.g., all SVGs failed sanitization or were invalid)
+               self::delete_svg_sprite( $group );
+         }
+
+
+      // if there are no *valid* & *published* images left in this sprite group
+      } else {
+         // Get rid of the potentially existing sprite file
+         self::delete_svg_sprite( $group );
+      }
+
+   } // end create_svg_sprite
 
 	/**
 	* Write svg code into the sprite file.

@@ -20,6 +20,11 @@ define( 'AQUA_SVG_SPRITE_VERSION', '3.0.3' );
 define( 'AQUA_SVG_SPRITE_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'AQUA_SVG_SPRITE_PLUGIN_URI', plugin_dir_url( __FILE__ ) );
 
+/**
+ * Loads Composer's autoloader to enable automatic class loading for vendor dependencies.
+ */
+require_once __DIR__ . '/vendor/autoload.php';
+
 // Runs the initial method for the AQUA_SVG_SPRITE class.
 require_once( AQUA_SVG_SPRITE_PLUGIN_DIR . 'class-aqua-svg-sprite.php' );
 AQUA_SVG_SPRITE::init();
